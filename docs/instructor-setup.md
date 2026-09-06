@@ -177,8 +177,8 @@ it.
 
 - Do not create `main`. An accidental `main` becomes the default branch and
   silently breaks the protection rule and the Coolify webhook.
-- The bio loader ignores `bios/TEMPLATE.md` and `bios/README.md`, so those two
-  files never render — you can document freely in them.
+- The bio loader skips `bios/TEMPLATE.yml`, and it only reads YAML files, so
+  `bios/README.md` is never picked up either — you can document freely in both.
 - Rerunning the exercise next term: delete the student bios from `bios/` in one
   instructor PR, keep everything else, re-run `scripts/roster.py` with the new
   roster.

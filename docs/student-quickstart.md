@@ -16,8 +16,11 @@ page ever disagree, that page wins.
 
 ## Goal
 
-Add `bios/firstname-lastname.md` for yourself, get it reviewed and merged into
+Add `bios/firstname-lastname.yml` for yourself, get it reviewed and merged into
 `testing`, and see it appear on the deployed site.
+
+The file is a YAML file — structured `key: value` data. Only one field,
+`about`, is prose, and that prose is Markdown.
 
 ## One thing that differs from the playbooks
 
@@ -31,7 +34,7 @@ There is no `staging`, no `production`, and no `main` here. You branch from
 
 - [ ] Linear issue "Add bio for &lt;Your Name&gt;" assigned to you
 - [ ] Branch created from Linear's **Copy git branch name**
-- [ ] `bios/firstname-lastname.md` written and previewed locally
+- [ ] `bios/firstname-lastname.yml` written and previewed locally
 - [ ] PR open into `testing`, CI green, assigned reviewer requested
 - [ ] You reviewed the PR you were assigned
 - [ ] Squash-merged, Linear issue in **Done**, site rebuilt
@@ -64,23 +67,45 @@ Check Linear: the issue should now be **In Progress** with the branch linked.
 ### 4. Create your file
 
 ```sh
-cp bios/TEMPLATE.md bios/jane-doe.md        # use YOUR name
+cp bios/TEMPLATE.yml bios/jane-doe.yml      # use YOUR name
 ```
 
 The filename must be the slug of your `name` field: "Jane Doe" ->
-`bios/jane-doe.md`. See [`bios/README.md`](../bios/README.md) for the filename
-rule and the full field table.
+`bios/jane-doe.yml`. The extension is `.yml`, not `.yaml`. See
+[`bios/README.md`](../bios/README.md) for the filename rule and the full field
+table.
 
 ### 5. Fill it in
 
-Open your file and edit it:
+Open your file and edit it. Nothing needs deleting to make it parse — the
+template is valid YAML as it ships, and the `#` lines are YAML comments.
 
-- **Delete the HTML comment on line 1.** Your file must start with `---` on
-  line 1 or validation fails with "no frontmatter found".
 - Set `name`, `team` (Team Falcon, Team Kestrel, Team Osprey or Team Harrier)
   and `headline` (90 characters maximum).
-- Uncomment any optional fields you want, delete the rest.
-- Replace the body with 40–2000 characters of Markdown about you.
+- Replace the `about` text with 40–2000 characters about you. Keep the
+  `about: |` line and keep your text indented two spaces under it; it is
+  rendered as Markdown, so `**bold**`, links and `-` lists work.
+- Uncomment any optional fields you want (`pronouns`, `location`, `focus`,
+  `links`, `avatar`, `fun_fact`) and leave the rest commented out.
+
+The result looks like this:
+
+```yaml
+name: Jane Doe
+team: Team Falcon
+headline: Backend engineer who likes boring infrastructure
+about: |
+  I work on **APIs** and the boring infrastructure underneath them. Most
+  recently I built a rate limiter that nobody has had to think about since.
+
+  - Comfortable in Python and Go
+  - Learning Kubernetes the hard way
+focus:
+  - Python
+  - Postgres
+links:
+  GitHub: https://github.com/janedoe
+```
 
 ### 6. Preview locally
 
@@ -119,7 +144,7 @@ You want `1 bio file(s) valid.` — or however many files are in the folder.
 ### 7. Commit and push
 
 ```sh
-git add bios/jane-doe.md
+git add bios/jane-doe.yml
 git commit -m "Add bio for Jane Doe"
 git push
 ```
@@ -143,9 +168,9 @@ You are also somebody's reviewer. The roster is a ring: student *n* reviews
 student *n+1*, and the last student reviews the first. Open their PR, read
 **Files changed**, and check:
 
-- frontmatter has `name`, `team`, `headline`; team is one of the four
-- the filename matches their name
-- the body reads professionally and is a sentence or two, not a placeholder
+- the file has `name`, `team`, `headline` and `about`; team is one of the four
+- the filename matches their name and ends in `.yml`
+- `about` reads professionally and is a sentence or two, not a placeholder
 - no files outside `bios/` were touched
 
 Approve when it is good enough to ship. Playbook:
@@ -173,9 +198,31 @@ git pull
 
 **CI is red.** Open the PR, go to **Files changed**, and read the annotation
 attached to your file. It names the exact fix, for example
-`bios/jane-d.md: filename must be 'jane-doe.md' to match name 'Jane Doe'`. Run
+`bios/jane-d.yml: filename must be 'jane-doe.yml' to match name 'Jane Doe'`. Run
 `python -m generator validate` locally to see the same message. Fix, commit,
 push — the PR re-runs itself.
+
+**A tab in your indentation.** YAML does not allow tabs anywhere in the
+indentation, and most editors insert one if you press Tab:
+
+```
+bios/jane-doe.yml: indented with a tab - YAML only allows spaces, so replace tabs with two spaces
+```
+
+**An unquoted value containing `': '`.** A colon followed by a space starts a
+new key as far as YAML is concerned, so
+`headline: Backend engineer: infrastructure` fails:
+
+```
+bios/jane-doe.yml: invalid YAML at line 3: mapping values are not allowed here - a value containing ': ' must be wrapped in quotes
+```
+
+Wrap the whole value in quotes:
+`headline: "Backend engineer: infrastructure"`.
+
+**You saved it as `.yaml`.** The extension is `.yml`. A `.yaml` file is
+reported as `filename must be lowercase 'firstname-lastname.yml' (letters,
+digits and hyphens only)` rather than being silently skipped.
 
 **Merge conflict.** You should not get one. Your PR adds one brand-new file that
 nobody else touches, and `site.yml` is instructor-owned, so there is no shared

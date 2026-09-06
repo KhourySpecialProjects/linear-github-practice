@@ -1,17 +1,20 @@
-"""Parsing and validation for one Markdown bio file per student.
+"""Parsing and validation for one YAML bio file per student.
 
-A bio file is YAML frontmatter plus a Markdown body:
+A bio file is a YAML mapping. Everything is structured data except ``about``,
+which is a block scalar holding a few sentences of Markdown:
 
-    ---
     name: Jane Doe
     team: Team Falcon
     headline: Backend engineer who likes boring infrastructure
-    ---
+    about: |
+      Two or three sentences about Jane. This is **Markdown**, so bold,
+      links and lists all work.
 
-    Two or three sentences about Jane.
-
-Every rule enforced here is reported as a :class:`Problem` with the file it
-came from, so CI failures read like instructions rather than tracebacks.
+YAML is unforgiving about three things in particular - tab indentation, an
+unquoted ``": "`` inside a value, and the indentation of a block scalar - so
+each of those gets its own message here rather than leaking PyYAML's wording.
+Every rule is reported as a :class:`Problem` naming the file it came from, so a
+red CI check reads like instructions.
 """
 
 from __future__ import annotations
@@ -27,22 +30,20 @@ from markupsafe import Markup
 from .config import SiteConfig
 from .text import hue_for, initials, slugify
 
-FRONTMATTER = re.compile(
-    r"\A---[ \t]*\r?\n(?P<meta>.*?)\r?\n---[ \t]*\r?\n?(?P<body>.*)\Z",
-    re.DOTALL,
-)
-FILENAME = re.compile(r"\A[a-z0-9]+(?:-[a-z0-9]+)+\.md\Z")
+FILENAME = re.compile(r"\A[a-z0-9]+(?:-[a-z0-9]+)+\.yml\Z")
 UNSAFE_HTML = re.compile(r"<\s*(?:script|iframe|object|embed)\b|javascript:", re.IGNORECASE)
+LEADING_TAB = re.compile(r"^[ ]*\t", re.MULTILINE)
 
 #: Files in ``bios/`` that are documentation, not student bios.
-RESERVED_FILES = frozenset({"TEMPLATE.md", "README.md"})
+RESERVED_FILES = frozenset({"TEMPLATE.yml"})
 
-REQUIRED_KEYS = ("name", "team", "headline")
+REQUIRED_KEYS = ("name", "team", "headline", "about")
 ALLOWED_KEYS = frozenset(
     {
         "name",
         "team",
         "headline",
+        "about",
         "pronouns",
         "location",
         "focus",
@@ -53,12 +54,14 @@ ALLOWED_KEYS = frozenset(
 )
 
 HEADLINE_MAX = 90
-BODY_MIN = 40
-BODY_MAX = 2000
+ABOUT_MIN = 40
+ABOUT_MAX = 2000
 FOCUS_MAX = 6
 FOCUS_ITEM_MAX = 24
 
 MARKDOWN_EXTENSIONS = ("extra", "sane_lists", "smarty")
+
+_ABOUT_SHAPE = "about: |\n  Two or three sentences about you."
 
 
 @dataclass(frozen=True, slots=True)
@@ -121,6 +124,23 @@ def _as_text(value: object) -> str | None:
     return str(value).strip()
 
 
+def _yaml_message(exc: yaml.YAMLError) -> str:
+    """Turn a PyYAML error into something a first-time YAML author can act on."""
+    problem = getattr(exc, "problem", None) or "could not be parsed"
+    mark = getattr(exc, "problem_mark", None)
+    where = f"line {mark.line + 1}" if mark is not None else "somewhere in the file"
+    hint = ""
+    if "mapping values are not allowed" in problem:
+        hint = " - a value containing ': ' must be wrapped in quotes"
+    elif "could not find expected ':'" in problem:
+        hint = " - every field is 'key: value', and continuation lines must be indented"
+    elif "found character '\\t'" in problem:
+        hint = " - YAML does not allow tabs; indent with spaces"
+    elif "another document" in problem or "expected a single document" in problem:
+        hint = " - remove the '---' lines; the whole file is YAML, not Markdown with front matter"
+    return f"invalid YAML at {where}: {problem}{hint}"
+
+
 def parse_bio(path: Path, config: SiteConfig, *, display_path: str | None = None) -> tuple[Bio | None, list[Problem]]:
     """Parse and validate a single bio file.
 
@@ -143,41 +163,44 @@ def parse_bio(path: Path, config: SiteConfig, *, display_path: str | None = None
 
     if not FILENAME.match(path.name):
         return fail(
-            "filename must be lowercase 'firstname-lastname.md' "
+            "filename must be lowercase 'firstname-lastname.yml' "
             "(letters, digits and hyphens only)"
         )
 
-    match = FRONTMATTER.match(text.lstrip("\ufeff"))
-    if not match:
-        return fail(
-            "no frontmatter found - the file must start with '---' on line 1, "
-            "then the YAML fields, then a closing '---'"
-        )
+    if LEADING_TAB.search(text):
+        return fail("indented with a tab - YAML only allows spaces, so replace tabs with two spaces")
 
     try:
-        meta = yaml.safe_load(match.group("meta")) or {}
+        data = yaml.safe_load(text.lstrip("\ufeff"))
     except yaml.YAMLError as exc:
-        first_line = str(exc).splitlines()[0]
-        return fail(f"frontmatter is not valid YAML - {first_line}")
-    if not isinstance(meta, dict):
-        return fail("frontmatter must be a list of 'key: value' fields")
+        return fail(_yaml_message(exc))
 
-    for key in sorted(set(meta) - ALLOWED_KEYS):
+    if data is None:
+        return fail("file is empty - start from bios/TEMPLATE.yml")
+    if not isinstance(data, dict):
+        return fail("file must be a list of 'key: value' fields - start from bios/TEMPLATE.yml")
+
+    for key in sorted(set(data) - ALLOWED_KEYS):
         problems.append(
-            Problem(rel, f"unknown frontmatter key {key!r} - allowed keys are: {', '.join(sorted(ALLOWED_KEYS))}")
+            Problem(rel, f"unknown key {key!r} - allowed keys are: {', '.join(sorted(ALLOWED_KEYS))}")
         )
 
-    missing = [key for key in REQUIRED_KEYS if not _as_text(meta.get(key))]
+    if isinstance(data.get("about"), (dict, list)):
+        return fail(f"'about' must be a block of text, written as:\n{_ABOUT_SHAPE}")
+
+    missing = [key for key in REQUIRED_KEYS if not _as_text(data.get(key))]
     if missing:
         for key in missing:
-            problems.append(Problem(rel, f"missing required frontmatter key {key!r}"))
+            hint = f", written as:\n{_ABOUT_SHAPE}" if key == "about" else ""
+            problems.append(Problem(rel, f"missing required key {key!r}{hint}"))
         return None, problems
 
-    name = _as_text(meta["name"]) or ""
-    team_name = _as_text(meta["team"]) or ""
-    headline = _as_text(meta["headline"]) or ""
+    name = _as_text(data["name"]) or ""
+    team_name = _as_text(data["team"]) or ""
+    headline = _as_text(data["headline"]) or ""
+    about = str(data["about"]).strip()
 
-    expected_filename = f"{slugify(name)}.md"
+    expected_filename = f"{slugify(name)}.yml"
     if path.name != expected_filename:
         problems.append(
             Problem(rel, f"filename must be {expected_filename!r} to match name {name!r}")
@@ -198,7 +221,7 @@ def parse_bio(path: Path, config: SiteConfig, *, display_path: str | None = None
             Problem(rel, f"headline is {len(headline)} characters - keep it under {HEADLINE_MAX}")
         )
 
-    focus_raw = meta.get("focus") or []
+    focus_raw = data.get("focus") or []
     focus: list[str] = []
     if isinstance(focus_raw, str):
         problems.append(Problem(rel, "'focus' must be a YAML list, e.g. '- Python'"))
@@ -220,7 +243,7 @@ def parse_bio(path: Path, config: SiteConfig, *, display_path: str | None = None
     else:
         problems.append(Problem(rel, "'focus' must be a YAML list of short strings"))
 
-    links_raw = meta.get("links") or {}
+    links_raw = data.get("links") or {}
     links: list[Link] = []
     if isinstance(links_raw, dict):
         for label, url in links_raw.items():
@@ -240,27 +263,35 @@ def parse_bio(path: Path, config: SiteConfig, *, display_path: str | None = None
             Problem(rel, "'links' must be a mapping of label to URL, e.g. 'GitHub: https://github.com/you'")
         )
 
-    avatar = _as_text(meta.get("avatar"))
+    avatar = _as_text(data.get("avatar"))
     if avatar and not avatar.startswith(("http://", "https://")):
         problems.append(Problem(rel, "'avatar' must be an https URL, or leave it out for a monogram"))
         avatar = None
 
-    body = match.group("body").strip()
-    if UNSAFE_HTML.search(body):
-        problems.append(Problem(rel, "remove embedded HTML/JavaScript - the bio body is Markdown only"))
-    elif len(body) < BODY_MIN:
+    body_html = Markup(markdown.markdown(about, extensions=list(MARKDOWN_EXTENSIONS)))
+
+    if UNSAFE_HTML.search(about):
+        problems.append(Problem(rel, "remove embedded HTML/JavaScript - 'about' is Markdown only"))
+    elif len(about) < ABOUT_MIN:
         problems.append(
-            Problem(rel, f"bio body is {len(body)} characters - write at least {BODY_MIN} (a sentence or two)")
+            Problem(rel, f"'about' is {len(about)} characters - write at least {ABOUT_MIN} (a sentence or two)")
         )
-    elif len(body) > BODY_MAX:
+    elif len(about) > ABOUT_MAX:
         problems.append(
-            Problem(rel, f"bio body is {len(body)} characters - trim it to under {BODY_MAX}")
+            Problem(rel, f"'about' is {len(about)} characters - trim it to under {ABOUT_MAX}")
+        )
+    elif "<pre" in body_html:
+        problems.append(
+            Problem(
+                rel,
+                "part of 'about' renders as a code block instead of prose - indent every line "
+                "exactly two spaces under 'about: |' and drop any ``` fences",
+            )
         )
 
     if problems:
         return None, problems
 
-    body_html = Markup(markdown.markdown(body, extensions=list(MARKDOWN_EXTENSIONS)))
     bio = Bio(
         slug=path.stem,
         name=name,
@@ -268,9 +299,9 @@ def parse_bio(path: Path, config: SiteConfig, *, display_path: str | None = None
         headline=headline,
         body_html=body_html,
         source=rel,
-        pronouns=_as_text(meta.get("pronouns")),
-        location=_as_text(meta.get("location")),
-        fun_fact=_as_text(meta.get("fun_fact")),
+        pronouns=_as_text(data.get("pronouns")),
+        location=_as_text(data.get("location")),
+        fun_fact=_as_text(data.get("fun_fact")),
         avatar=avatar,
         focus=tuple(focus),
         links=tuple(links),
@@ -279,13 +310,13 @@ def parse_bio(path: Path, config: SiteConfig, *, display_path: str | None = None
 
 
 def load_bios(bios_dir: Path, config: SiteConfig) -> tuple[tuple[Bio, ...], tuple[Problem, ...]]:
-    """Load every ``bios/*.md`` file: whatever is present makes up the site."""
+    """Load every ``bios/*.yml`` file: whatever is present makes up the site."""
     problems: list[Problem] = []
     if not bios_dir.is_dir():
         return (), (Problem(bios_dir.as_posix(), "bios directory not found"),)
 
     bios: list[Bio] = []
-    for path in sorted(bios_dir.glob("*.md")):
+    for path in sorted(bios_dir.glob("*.y*ml")):
         if path.name in RESERVED_FILES:
             continue
         bio, file_problems = parse_bio(path, config, display_path=path.as_posix())

@@ -1,0 +1,63 @@
+# Copy this file to bios/firstname-lastname.yml before you edit it.
+# The filename must be the slug of the 'name' value below:
+# "Jane Doe" -> bios/jane-doe.yml, "Jose Alvarez" -> bios/jose-alvarez.yml.
+# Lowercase letters, digits and hyphens only, with at least one hyphen.
+# TEMPLATE.yml is a reserved name, so this file never appears on the site.
+#
+# The whole file is YAML: one 'key: value' field per line, no '---' marker.
+# Two traps the validator will report back to you:
+#   1. Indent with spaces, never tabs. Two spaces per level.
+#   2. Quote any value that contains a colon followed by a space, like
+#      headline: "Compilers: still the good part"
+
+# REQUIRED. Your full name, spelled the way you want it on the site.
+name: Your Name
+
+# REQUIRED. Exactly one of: Team Falcon, Team Kestrel, Team Osprey, Team Harrier.
+# Matched ignoring case; anything else fails validation.
+team: Team Falcon
+
+# REQUIRED. One line, at most 90 characters.
+headline: Second-year CS student who likes small pull requests
+
+# REQUIRED. Between 40 and 2000 characters. Rendered as Markdown, so **bold**,
+# *italic*, lists and [links](https://example.com) all work. Embedded HTML and
+# javascript URLs are rejected. Keep every line indented two spaces under the
+# 'about: |' line; blank lines start a new paragraph.
+about: |
+  Replace this text with two or three sentences about yourself. What do you
+  work on, what do you want to get better at this semester, and what would a
+  teammate find useful to know about how you work?
+
+# ---------------------------------------------------------------------------
+# Everything below is OPTIONAL and commented out. Uncomment the fields you
+# want and leave the rest alone. Any key that is not listed in this file is a
+# validation error, so do not invent new ones.
+# ---------------------------------------------------------------------------
+
+# OPTIONAL. Short string.
+# pronouns: she/her
+
+# OPTIONAL. Short string.
+# location: Boston, MA
+
+# OPTIONAL. A YAML list, at most 6 entries, each at most 24 characters.
+# focus:
+#   - Python
+#   - Postgres
+#   - Accessibility
+
+# OPTIONAL. A mapping of label to URL. Every URL must start with https://
+# (http:// and mailto: are also accepted).
+# links:
+#   GitHub: https://github.com/your-handle
+#   LinkedIn: https://www.linkedin.com/in/your-handle
+#   Email: mailto:you@example.com
+
+# OPTIONAL. An https URL to a square image, roughly 400px, on a host that
+# allows hotlinking. Leave it out and the site draws a monogram from your
+# initials instead - which is also what you get if the URL ever stops working.
+# avatar: https://avatars.githubusercontent.com/u/000000
+
+# OPTIONAL. One sentence.
+# fun_fact: Has opinions about the correct number of terminal tabs.

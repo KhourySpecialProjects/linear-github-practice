@@ -4,6 +4,10 @@ The exercise lives or dies on `python -m generator validate` telling a student
 exactly what to fix, so these tests assert on the *problems* a bad bio file
 produces (by substring, so wording can be improved without breaking the suite)
 and on the values a template is allowed to read off a good one.
+
+A bio is now a plain YAML mapping, so YAML's own sharp edges - tabs, an
+unquoted ``": "`` inside a value, an empty file, a block scalar written as a
+nested mapping - are part of the contract and get their own tests.
 """
 
 from __future__ import annotations
@@ -12,7 +16,16 @@ import textwrap
 
 import pytest
 
-from generator.bios import BODY_MAX, BODY_MIN, Link, load_bios, parse_bio
+from generator.bios import (
+    ABOUT_MAX,
+    ABOUT_MIN,
+    FOCUS_ITEM_MAX,
+    FOCUS_MAX,
+    HEADLINE_MAX,
+    Link,
+    load_bios,
+    parse_bio,
+)
 from generator.config import ConfigError, SiteConfig
 from generator.text import hue_for, initials, slugify
 
@@ -30,7 +43,24 @@ teams:
     accent: "#00b6a4"
 """
 
-BODY = "Backend engineer who likes boring infrastructure and thorough code review."
+#: The Markdown that lives in the ``about:`` block scalar of a good bio.
+ABOUT = """\
+I work on **APIs** and the boring infrastructure underneath them.
+
+- Comfortable in Python and Go
+- Learning Kubernetes the hard way
+"""
+
+#: A one-line ``about:`` block, for tests that assemble the document by hand.
+ONE_LINE_ABOUT = "about: |\n  A sentence about Jane that clears the minimum length comfortably.\n"
+
+REQUIRED_FIELDS = {
+    "name": "name: Jane Doe",
+    "team": "team: Team Falcon",
+    "headline": "headline: Backend engineer who likes boring infrastructure",
+}
+
+MINIMAL = "\n".join(REQUIRED_FIELDS.values())
 
 
 @pytest.fixture
@@ -48,11 +78,19 @@ def bios_dir(tmp_path):
     return directory
 
 
-def write_bio(directory, filename: str, frontmatter: str, body: str = BODY):
-    """Write one bio file the way a student would, and return its path."""
+def write_bio(directory, filename: str, fields: str = MINIMAL, about: str | None = ABOUT):
+    """Write one YAML bio the way a student would, and return its path.
+
+    ``fields`` is the structured part of the mapping; ``about`` is appended as
+    a block scalar unless it is ``None`` (for the tests that write their own
+    ``about``, or deliberately leave it out).
+    """
     path = directory / filename
-    meta = textwrap.dedent(frontmatter).strip("\n")
-    path.write_text(f"---\n{meta}\n---\n\n{body}\n", encoding="utf-8")
+    document = textwrap.dedent(fields).strip("\n")
+    if about is not None:
+        block = textwrap.indent(textwrap.dedent(about).strip("\n"), "  ")
+        document = f"{document}\nabout: |\n{block}"
+    path.write_text(f"{document}\n", encoding="utf-8")
     return path
 
 
@@ -64,7 +102,7 @@ def messages(problems) -> str:
 def test_valid_bio_exposes_the_values_templates_read(bios_dir, config):
     path = write_bio(
         bios_dir,
-        "jane-doe.md",
+        "jane-doe.yml",
         """
         name: Jane Doe
         team: team falcon
@@ -80,7 +118,6 @@ def test_valid_bio_exposes_the_values_templates_read(bios_dir, config):
           GitHub: https://github.com/janedoe
           Email: mailto:doe.j@northeastern.edu
         """,
-        body="Backend engineer with a **bias for small pull requests** and clear commits.",
     )
 
     bio, problems = parse_bio(path, config)
@@ -102,65 +139,57 @@ def test_valid_bio_exposes_the_values_templates_read(bios_dir, config):
         Link(label="GitHub", url="https://github.com/janedoe"),
         Link(label="Email", url="mailto:doe.j@northeastern.edu"),
     )
-    assert "<p>" in bio.body_html
-    assert "<strong>bias for small pull requests</strong>" in bio.body_html
     assert bio.initials == "JD"
+    # 'about' is a block scalar but it is still rendered as Markdown.
+    assert "<strong>APIs</strong>" in bio.body_html
+    assert "<li>Comfortable in Python and Go</li>" in bio.body_html
 
 
-def test_missing_frontmatter_block_is_reported(bios_dir, config):
-    path = bios_dir / "jane-doe.md"
-    path.write_text("Just some prose, no frontmatter delimiters at all.\n", encoding="utf-8")
-
-    bio, problems = parse_bio(path, config)
-
-    assert bio is None
-    assert "no frontmatter" in messages(problems)
-
-
-def test_missing_required_key_names_the_key(bios_dir, config):
-    path = write_bio(
-        bios_dir,
-        "jane-doe.md",
-        """
-        name: Jane Doe
-        team: Team Falcon
-        """,
-    )
+@pytest.mark.parametrize("missing", sorted(REQUIRED_FIELDS))
+def test_each_missing_required_key_names_the_key(bios_dir, config, missing):
+    fields = "\n".join(line for key, line in REQUIRED_FIELDS.items() if key != missing)
+    path = write_bio(bios_dir, "jane-doe.yml", fields)
 
     bio, problems = parse_bio(path, config)
 
     assert bio is None
-    assert "missing required frontmatter key 'headline'" in messages(problems)
+    assert f"missing required key '{missing}'" in messages(problems)
 
 
-def test_unknown_key_is_rejected_and_lists_the_allowed_keys(bios_dir, config):
-    path = write_bio(
-        bios_dir,
-        "jane-doe.md",
-        """
-        name: Jane Doe
-        team: Team Falcon
-        headline: Backend engineer
-        twitter: janedoe
-        """,
-    )
+def test_missing_about_shows_the_block_scalar_shape(bios_dir, config):
+    path = write_bio(bios_dir, "jane-doe.yml", MINIMAL, about=None)
 
     bio, problems = parse_bio(path, config)
 
     assert bio is None
     text = messages(problems)
-    assert "unknown frontmatter key 'twitter'" in text
-    assert "fun_fact" in text  # the allowed-key list is spelled out for the student
+    assert "missing required key 'about'" in text
+    # The student is shown the shape, because 'about: |' is the part they get wrong.
+    assert "about: |" in text
+    assert "Two or three sentences" in text
+
+
+def test_unknown_key_is_rejected_and_lists_the_allowed_keys(bios_dir, config):
+    path = write_bio(bios_dir, "jane-doe.yml", f"{MINIMAL}\ntwitter: '@janedoe'")
+
+    bio, problems = parse_bio(path, config)
+
+    assert bio is None
+    text = messages(problems)
+    assert "unknown key 'twitter'" in text
+    # The allowed-key list is spelled out rather than hinted at.
+    assert "fun_fact" in text
+    assert "pronouns" in text
 
 
 def test_unknown_team_lists_the_course_teams(bios_dir, config):
     path = write_bio(
         bios_dir,
-        "jane-doe.md",
+        "jane-doe.yml",
         """
         name: Jane Doe
         team: Team Penguin
-        headline: Backend engineer
+        headline: Backend engineer who likes boring infrastructure
         """,
     )
 
@@ -168,41 +197,45 @@ def test_unknown_team_lists_the_course_teams(bios_dir, config):
 
     assert bio is None
     text = messages(problems)
-    assert "not one of the course teams" in text
+    assert "Team Penguin" in text
     assert "Team Falcon" in text
     assert "Team Kestrel" in text
 
 
 def test_filename_must_match_the_name_field(bios_dir, config):
-    path = write_bio(
-        bios_dir,
-        "jane-d.md",
-        """
-        name: Jane Doe
-        team: Team Falcon
-        headline: Backend engineer
-        """,
-    )
+    wrong = write_bio(bios_dir, "jane-doe.yml", "name: Jane Zebra\n" + "\n".join(
+        line for key, line in REQUIRED_FIELDS.items() if key != "name"
+    ))
 
-    bio, problems = parse_bio(path, config)
+    bio, problems = parse_bio(wrong, config)
 
     assert bio is None
     text = messages(problems)
-    assert "jane-doe.md" in text
-    assert "Jane Doe" in text
+    assert "jane-zebra.yml" in text
+    assert "Jane Zebra" in text
+
+    # Control: the identical bio under the matching filename is accepted, so
+    # this test cannot pass just because something else is broken.
+    right = write_bio(bios_dir, "jane-zebra.yml", "name: Jane Zebra\n" + "\n".join(
+        line for key, line in REQUIRED_FIELDS.items() if key != "name"
+    ))
+    good, no_problems = parse_bio(right, config)
+    assert no_problems == []
+    assert good is not None and good.slug == "jane-zebra"
 
 
-@pytest.mark.parametrize("filename", ["Jane-Doe.md", "jane doe.md", "jane_doe.md", "jane.md"])
-def test_filename_must_be_lowercase_hyphenated(bios_dir, config, filename):
-    path = write_bio(
-        bios_dir,
-        filename,
-        """
-        name: Jane Doe
-        team: Team Falcon
-        headline: Backend engineer
-        """,
-    )
+@pytest.mark.parametrize(
+    "filename",
+    [
+        "Jane-Doe.yml",  # uppercase
+        "jane doe.yml",  # space
+        "jane_doe.yml",  # underscore
+        "jane.yml",  # no hyphen, so no family name
+        "jane-doe.yaml",  # the wrong extension is reported, not ignored
+    ],
+)
+def test_bad_filenames_are_rejected(bios_dir, config, filename):
+    path = write_bio(bios_dir, filename)
 
     bio, problems = parse_bio(path, config)
 
@@ -210,39 +243,32 @@ def test_filename_must_be_lowercase_hyphenated(bios_dir, config, filename):
     assert "filename must be lowercase" in messages(problems)
 
 
-def test_body_shorter_than_the_minimum_is_rejected(bios_dir, config):
-    short = "Too short."
-    assert len(short) < BODY_MIN
-    path = write_bio(
-        bios_dir,
-        "jane-doe.md",
-        """
-        name: Jane Doe
-        team: Team Falcon
-        headline: Backend engineer
-        """,
-        body=short,
-    )
+def test_yaml_extension_is_reported_by_the_loader_not_silently_skipped(bios_dir, config):
+    # load_bios globs '*.y*ml' precisely so a student who saves '.yaml' gets a
+    # filename error instead of a mysteriously missing bio page.
+    write_bio(bios_dir, "jane-doe.yaml")
+
+    bios, problems = load_bios(bios_dir, config)
+
+    assert bios == ()
+    assert [problem.path.rsplit("/", 1)[-1] for problem in problems] == ["jane-doe.yaml"]
+    assert "filename must be lowercase" in messages(problems)
+
+
+def test_about_shorter_than_the_minimum_is_rejected(bios_dir, config):
+    path = write_bio(bios_dir, "jane-doe.yml", about="Too short.")
 
     bio, problems = parse_bio(path, config)
 
     assert bio is None
-    assert f"at least {BODY_MIN}" in messages(problems)
+    assert f"at least {ABOUT_MIN}" in messages(problems)
 
 
-def test_body_of_exactly_the_minimum_length_is_valid(bios_dir, config):
-    exact = "Exactly the minimum length of bio prose."
-    assert len(exact) == BODY_MIN
-    path = write_bio(
-        bios_dir,
-        "jane-doe.md",
-        """
-        name: Jane Doe
-        team: Team Falcon
-        headline: Backend engineer
-        """,
-        body=exact,
-    )
+def test_about_of_exactly_the_minimum_length_is_valid(bios_dir, config):
+    exact = "Exactly forty characters of honest prose"
+    assert len(exact) == ABOUT_MIN
+
+    path = write_bio(bios_dir, "jane-doe.yml", about=exact)
 
     bio, problems = parse_bio(path, config)
 
@@ -250,35 +276,61 @@ def test_body_of_exactly_the_minimum_length_is_valid(bios_dir, config):
     assert bio is not None
 
 
-def test_body_longer_than_the_maximum_is_rejected(bios_dir, config):
+def test_about_longer_than_the_maximum_is_rejected(bios_dir, config):
+    path = write_bio(bios_dir, "jane-doe.yml", about="Detail about the work. " * 120)
+
+    bio, problems = parse_bio(path, config)
+
+    assert bio is None
+    assert f"under {ABOUT_MAX}" in messages(problems)
+
+
+def test_headline_longer_than_the_maximum_is_rejected(bios_dir, config):
+    long_headline = "Backend engineer " * 8
     path = write_bio(
         bios_dir,
-        "jane-doe.md",
-        """
-        name: Jane Doe
-        team: Team Falcon
-        headline: Backend engineer
-        """,
-        body="word " * (BODY_MAX // 2),
+        "jane-doe.yml",
+        f"name: Jane Doe\nteam: Team Falcon\nheadline: {long_headline.strip()}",
     )
 
     bio, problems = parse_bio(path, config)
 
     assert bio is None
-    assert f"under {BODY_MAX}" in messages(problems)
+    assert f"under {HEADLINE_MAX}" in messages(problems)
+
+
+def test_too_many_focus_entries_are_rejected(bios_dir, config):
+    # Eight entries is a literal over-run of the documented limit of six: if the
+    # cap were quietly raised, this bio would be accepted and the test would fail.
+    entries = "\n".join(f"  - Skill {index}" for index in range(8))
+    path = write_bio(bios_dir, "jane-doe.yml", f"{MINIMAL}\nfocus:\n{entries}")
+
+    bio, problems = parse_bio(path, config)
+
+    assert bio is None
+    assert f"at most {FOCUS_MAX}" in messages(problems)
+
+
+def test_focus_entry_longer_than_a_chip_is_rejected(bios_dir, config):
+    # 'focus' renders as small chips, so a sentence smuggled into one is a
+    # layout bug: 34 characters is a literal over-run of the 24-character rule.
+    long_entry = "Distributed systems and caching"
+    assert len(long_entry) > FOCUS_ITEM_MAX
+    path = write_bio(bios_dir, "jane-doe.yml", f"{MINIMAL}\nfocus:\n  - {long_entry}")
+
+    bio, problems = parse_bio(path, config)
+
+    assert bio is None
+    text = messages(problems)
+    assert long_entry in text
+    assert f"under {FOCUS_ITEM_MAX} characters" in text
 
 
 def test_link_without_a_scheme_is_rejected(bios_dir, config):
     path = write_bio(
         bios_dir,
-        "jane-doe.md",
-        """
-        name: Jane Doe
-        team: Team Falcon
-        headline: Backend engineer
-        links:
-          GitHub: github.com/janedoe
-        """,
+        "jane-doe.yml",
+        f"{MINIMAL}\nlinks:\n  GitHub: github.com/janedoe",
     )
 
     bio, problems = parse_bio(path, config)
@@ -289,16 +341,11 @@ def test_link_without_a_scheme_is_rejected(bios_dir, config):
     assert "https://" in text
 
 
-def test_raw_script_in_the_body_is_rejected(bios_dir, config):
+def test_raw_script_in_about_is_rejected(bios_dir, config):
     path = write_bio(
         bios_dir,
-        "jane-doe.md",
-        """
-        name: Jane Doe
-        team: Team Falcon
-        headline: Backend engineer
-        """,
-        body="Backend engineer. <script>alert('hi')</script> And some more prose here.",
+        "jane-doe.yml",
+        about="Backend engineer. <script>alert('hi')</script> And some more prose here.",
     )
 
     bio, problems = parse_bio(path, config)
@@ -307,18 +354,148 @@ def test_raw_script_in_the_body_is_rejected(bios_dir, config):
     assert "HTML/JavaScript" in messages(problems)
 
 
-def test_load_bios_skips_the_reserved_documentation_files(bios_dir, config):
-    (bios_dir / "TEMPLATE.md").write_text("---\nnot: a bio\n---\n\nCopy me.\n", encoding="utf-8")
-    (bios_dir / "README.md").write_text("# How to add your bio\n", encoding="utf-8")
-    write_bio(
+def test_tab_indentation_is_reported_in_terms_of_tabs_and_spaces(bios_dir, config):
+    path = bios_dir / "jane-doe.yml"
+    path.write_text(f"{MINIMAL}\nfocus:\n\t- Python\nabout: |\n  {ABOUT.strip()}\n", encoding="utf-8")
+
+    bio, problems = parse_bio(path, config)
+
+    assert bio is None
+    text = messages(problems)
+    # Tabs get their own instruction instead of leaking PyYAML's wording, which
+    # points at a column rather than telling the student what to type.
+    assert "replace tabs with two spaces" in text
+    assert "invalid YAML" not in text
+
+
+def test_unquoted_colon_in_a_value_is_reported_with_a_quoting_hint(bios_dir, config):
+    path = write_bio(
         bios_dir,
-        "jane-doe.md",
+        "jane-doe.yml",
         """
         name: Jane Doe
         team: Team Falcon
-        headline: Backend engineer
+        headline: Backend engineer: likes boring infra
         """,
     )
+
+    bio, problems = parse_bio(path, config)
+
+    assert bio is None
+    text = messages(problems)
+    assert "invalid YAML at line" in text
+    assert "quotes" in text
+
+
+def test_empty_file_points_at_the_template(bios_dir, config):
+    path = bios_dir / "jane-doe.yml"
+    path.write_text("", encoding="utf-8")
+
+    bio, problems = parse_bio(path, config)
+
+    assert bio is None
+    text = messages(problems)
+    assert "empty" in text
+    assert "TEMPLATE.yml" in text
+
+
+def test_over_indented_paragraph_is_caught_instead_of_rendering_as_a_code_block(bios_dir, config):
+    """Markdown turns a four-space indent into a code block, which looks broken.
+
+    A student editing the template's ``about`` block is one stray Tab-to-spaces
+    away from this, and the rendered page gives no clue why their sentence came
+    out grey and monospaced.
+    """
+    path = bios_dir / "jane-doe.yml"
+    path.write_text(
+        f"{MINIMAL}\nabout: |\n  First paragraph, comfortably over the minimum length.\n\n"
+        "      Second paragraph indented six spaces by accident.\n",
+        encoding="utf-8",
+    )
+
+    bio, problems = parse_bio(path, config)
+
+    assert bio is None
+    text = messages(problems)
+    assert "code block" in text
+    assert "two spaces" in text
+
+
+def test_a_fenced_code_block_in_about_is_rejected(bios_dir, config):
+    path = bios_dir / "jane-doe.yml"
+    path.write_text(
+        f"{MINIMAL}\nabout: |\n  How I work, which is a long enough sentence to pass:\n\n"
+        "  ```\n  git commit -m \"wip\"\n  ```\n",
+        encoding="utf-8",
+    )
+
+    bio, problems = parse_bio(path, config)
+
+    assert bio is None
+    assert "code block" in messages(problems)
+
+
+def test_a_leftover_front_matter_fence_is_explained(bios_dir, config):
+    """Opening and closing '---' is two YAML documents, whose native error is opaque."""
+    path = bios_dir / "jane-doe.yml"
+    path.write_text(f"---\n{MINIMAL}\n{ONE_LINE_ABOUT}---\n", encoding="utf-8")
+
+    bio, problems = parse_bio(path, config)
+
+    assert bio is None
+    text = messages(problems)
+    assert "remove the '---' lines" in text
+
+
+def test_a_single_leading_document_marker_is_still_valid_yaml(bios_dir, config):
+    """One '---' is legal YAML, so it must not be swept up by the fence check."""
+    path = bios_dir / "jane-doe.yml"
+    path.write_text(f"---\n{MINIMAL}\n{ONE_LINE_ABOUT}", encoding="utf-8")
+
+    bio, problems = parse_bio(path, config)
+
+    assert problems == []
+    assert bio is not None
+
+
+@pytest.mark.parametrize(
+    "document",
+    [
+        "- name: Jane Doe\n- team: Team Falcon\n",  # a top-level list
+        "just some prose about Jane\n",  # a bare scalar
+    ],
+)
+def test_top_level_must_be_a_mapping_of_fields(bios_dir, config, document):
+    path = bios_dir / "jane-doe.yml"
+    path.write_text(document, encoding="utf-8")
+
+    bio, problems = parse_bio(path, config)
+
+    assert bio is None
+    assert "'key: value' fields" in messages(problems)
+
+
+def test_about_written_as_a_nested_mapping_shows_the_block_scalar_shape(bios_dir, config):
+    path = write_bio(
+        bios_dir,
+        "jane-doe.yml",
+        f"{MINIMAL}\nabout:\n  summary: I work on APIs and the infrastructure underneath them.",
+        about=None,
+    )
+
+    bio, problems = parse_bio(path, config)
+
+    assert bio is None
+    text = messages(problems)
+    assert "'about' must be a block of text" in text
+    assert "about: |" in text
+
+
+def test_load_bios_skips_the_template_and_ignores_the_readme(bios_dir, config):
+    # TEMPLATE.yml is reserved, and README.md no longer even matches the glob.
+    (bios_dir / "TEMPLATE.yml").write_text("name: Your Name\nteam: Your Team\n", encoding="utf-8")
+    (bios_dir / "README.md").write_text("# How to add your bio\n", encoding="utf-8")
+    write_bio(bios_dir, "jane-doe.yml")
 
     bios, problems = load_bios(bios_dir, config)
 
@@ -327,62 +504,43 @@ def test_load_bios_skips_the_reserved_documentation_files(bios_dir, config):
 
 
 def test_load_bios_sorts_by_family_name(bios_dir, config):
+    # Given names deliberately run A, B, J while family names run Z, A, M, so
+    # the expected order cannot be produced by the directory glob alone.
     for filename, name in (
-        ("jane-zebra.md", "Jane Zebra"),
-        ("ada-apple.md", "Ada Apple"),
-        ("bo-mango.md", "Bo Mango"),
+        ("ada-zebra.yml", "Ada Zebra"),
+        ("bo-apple.yml", "Bo Apple"),
+        ("jane-mango.yml", "Jane Mango"),
     ):
         write_bio(
             bios_dir,
             filename,
-            f"""
-            name: {name}
-            team: Team Falcon
-            headline: Backend engineer
-            """,
+            f"name: {name}\nteam: Team Falcon\nheadline: Backend engineer",
         )
 
     bios, problems = load_bios(bios_dir, config)
 
     assert problems == ()
-    assert [bio.name for bio in bios] == ["Ada Apple", "Bo Mango", "Jane Zebra"]
+    assert [bio.name for bio in bios] == ["Bo Apple", "Jane Mango", "Ada Zebra"]
 
 
 def test_load_bios_accumulates_problems_from_every_bad_file(bios_dir, config):
+    write_bio(bios_dir, "jane-doe.yml")
     write_bio(
         bios_dir,
-        "jane-doe.md",
-        """
-        name: Jane Doe
-        team: Team Falcon
-        headline: Backend engineer
-        """,
+        "bad-team.yml",
+        "name: Bad Team\nteam: Team Penguin\nheadline: Backend engineer",
     )
-    write_bio(
-        bios_dir,
-        "bad-team.md",
-        """
-        name: Bad Team
-        team: Team Penguin
-        headline: Backend engineer
-        """,
-    )
-    write_bio(
-        bios_dir,
-        "no-headline.md",
-        """
-        name: No Headline
-        team: Team Falcon
-        """,
-    )
+    write_bio(bios_dir, "no-headline.yml", "name: No Headline\nteam: Team Falcon")
+    (bios_dir / "broken-yaml.yml").write_text("name: Broken Yaml\nteam Team Falcon\n", encoding="utf-8")
 
     bios, problems = load_bios(bios_dir, config)
 
-    # The valid file still loads, and neither bad file hides the other.
+    # The valid file still loads, and no bad file hides another.
     assert [bio.slug for bio in bios] == ["jane-doe"]
     assert {problem.path.rsplit("/", 1)[-1] for problem in problems} == {
-        "bad-team.md",
-        "no-headline.md",
+        "bad-team.yml",
+        "no-headline.yml",
+        "broken-yaml.yml",
     }
 
 

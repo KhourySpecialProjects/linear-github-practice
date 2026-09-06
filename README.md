@@ -1,6 +1,6 @@
 # Linear + GitHub Practice: Bio Aggregator
 
-A professional bio aggregator for the practicum. Every student adds one Markdown
+A professional bio aggregator for the practicum. Every student adds one YAML
 file to `bios/`, and the site is regenerated from whatever files exist at build
 time — one card on the home page and one detail page per person.
 
@@ -42,20 +42,23 @@ file and the fix.
 
 ## How the site is built
 
-`bios/*.md` + `site.yml` -> Jinja2 templates -> `dist/` -> nginx.
+`bios/*.yml` + `site.yml` -> Jinja2 templates -> `dist/` -> nginx.
 
-The build reads every `bios/*.md` (skipping `TEMPLATE.md` and `README.md`),
-validates it, groups bios by the teams declared in `site.yml`, and writes
-`dist/index.html`, `dist/404.html`, `dist/<slug>/index.html` and
-`dist/assets/**`. Whatever files are present at build time are the site — there
-is no database and no state. A broken bio fails the build rather than shipping a
-broken page.
+The build reads every `bios/*.yml` (skipping `TEMPLATE.yml`), validates it,
+groups bios by the teams declared in `site.yml`, and writes `dist/index.html`,
+`dist/404.html`, `dist/<slug>/index.html` and `dist/assets/**`. Whatever files
+are present at build time are the site — there is no database and no state. A
+broken bio fails the build rather than shipping a broken page.
+
+A bio file is structured data: `name`, `team`, `headline` and the optional
+fields are plain YAML values. The one prose field is `about`, a YAML block
+scalar that is rendered as Markdown.
 
 ## Repository layout
 
 ```
-bios/                        one Markdown file per person; add yours, edit nobody else's
-  TEMPLATE.md                copy this to bios/firstname-lastname.md
+bios/                        one YAML file per person; add yours, edit nobody else's
+  TEMPLATE.yml               copy this to bios/firstname-lastname.yml
   README.md                  the folder's field table and filename rule
 docs/
   student-quickstart.md      the page a student follows during class

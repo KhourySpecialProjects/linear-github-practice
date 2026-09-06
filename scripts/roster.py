@@ -74,7 +74,7 @@ except ImportError:
         )
 
 QUICKSTART = "docs/student-quickstart.md"
-TEMPLATE = "bios/TEMPLATE.md"
+TEMPLATE = "bios/TEMPLATE.yml"
 
 FIELDS = (
     "name",
@@ -134,16 +134,16 @@ def describe(student: Student, slug: str, reviewer: Student) -> str:
     reviewer_handle = f" (@{reviewer.github})" if reviewer.github else ""
     return "\n".join(
         (
-            f"Add your professional bio to the site as `bios/{slug}.md`.",
+            f"Add your professional bio to the site as `bios/{slug}.yml`.",
             "",
-            f"- **File to create:** `bios/{slug}.md` (the filename must match your name exactly)",
+            f"- **File to create:** `bios/{slug}.yml` (the filename must match your name exactly)",
             team_line,
             f"- **Your reviewer:** {reviewer.name}{reviewer_handle}",
             "",
             "Steps:",
             "",
             "1. Move this issue to In Progress and use **Copy git branch name** for your branch.",
-            f"2. Copy `{TEMPLATE}` to `bios/{slug}.md` and fill it in.",
+            f"2. Copy `{TEMPLATE}` to `bios/{slug}.yml` and fill it in.",
             "3. Run `python -m generator validate` until it passes, then push and open a pull request into `testing`.",
             f"4. Ask {reviewer.name} for the approving review, then squash-merge.",
             "",
@@ -178,7 +178,7 @@ def build_records(students: list[Student]) -> list[dict[str, str]]:
         if slug in slugs:
             print(
                 f"warning: {student.name!r} and {slugs[slug]!r} both slug to {slug!r} "
-                f"- they cannot both add bios/{slug}.md",
+                f"- they cannot both add bios/{slug}.yml",
                 file=sys.stderr,
             )
         else:
@@ -187,7 +187,7 @@ def build_records(students: list[Student]) -> list[dict[str, str]]:
             {
                 "name": student.name,
                 "slug": slug,
-                "file": f"bios/{slug}.md",
+                "file": f"bios/{slug}.yml",
                 "team": student.team,
                 "github": student.github,
                 "reviewer": reviewer.name,

@@ -83,9 +83,9 @@ starts.
 |---|---|
 | 0–5 | **Framing and demo.** One issue -> one branch -> one PR -> review -> merge -> deploy. Show the deployed site and the merged example bio. State the one difference from the playbooks: this repo has only `testing`. |
 | 5–10 | **Claim issue, cut branch.** Assign the issue, **Copy git branch name**, `git switch testing && git pull`, `git switch -c lgh-##-...`, `git push -u origin HEAD`. Everyone confirms their issue flipped to In Progress. |
-| 10–25 | **Write and preview the bio.** `cp bios/TEMPLATE.md bios/firstname-lastname.md`, delete the comment on line 1, fill the frontmatter, write the body, then `docker compose up --build` (or `python -m generator validate` for the impatient). Circulate: most errors are the filename/`name` mismatch and a missing `---` on line 1. |
+| 10–25 | **Write and preview the bio.** `cp bios/TEMPLATE.yml bios/firstname-lastname.yml`, set `name`/`team`/`headline`, replace the `about` block, uncomment any optional fields, then `docker compose up --build` (or `python -m generator validate` for the impatient). Nothing needs deleting to make the template parse. Circulate: most errors are the filename/`name` mismatch and YAML indentation. |
 | 25–32 | **Commit, push, open the PR.** One file, imperative message, base `testing`. Watch the checks start. Tell everyone to request the reviewer named on their issue, then stop touching their own PR. |
-| 32–42 | **Review ring.** Each student reviews exactly one PR: frontmatter valid, filename matches the name, body reads professionally, no other files touched. Approve when good enough. Call out the two-minute mark so nobody sits on a review. |
+| 32–42 | **Review ring.** Each student reviews exactly one PR: `name`, `team`, `headline` and `about` present and valid, filename matches the name and ends in `.yml`, `about` reads professionally, no other files touched. Approve when good enough. Call out the two-minute mark so nobody sits on a review. |
 | 42–48 | **Merge and deploy.** Squash and merge, delete branch, confirm Linear went to Done. Put the deployed site on the projector and refresh as cards appear. |
 | 48–50 | **Debrief.** See below. |
 
@@ -101,8 +101,9 @@ must not be rushed, because it is the part they have never done before.
 | Ring broken by an absent student | Re-point the orphaned author at the next present student in the ring and say so out loud; do not re-generate the ring mid-class. |
 | CI red at minute 45 | Two options: read the annotation with them and fix it in 30 seconds, or admin-bypass the merge and have them fix it in a follow-up PR. Bypassing on purpose, out loud, is a better lesson than a stalled room. |
 | CI red for everyone at once | Something is wrong with the repo, not the students: check `site.yml` parses and the last merge to `testing` is green. Fall back to local `python -m generator validate` as the gate and merge with admin bypass. |
-| Student finishes early | Have them review a second PR (a real review, not a rubber stamp), or improve their body copy and push an update so they exercise re-request review. |
-| "No frontmatter found" wave | They left the HTML comment on line 1 of the copied template. Demo the fix once for the whole room. |
+| Student finishes early | Have them review a second PR (a real review, not a rubber stamp), or improve their `about` copy and push an update so they exercise re-request review. |
+| YAML indentation wave | A tab in the indentation gives `indented with a tab - YAML only allows spaces, so replace tabs with two spaces`; an unquoted value containing `': '` gives `invalid YAML at line N: mapping values are not allowed here - a value containing ': ' must be wrapped in quotes`. Demo both fixes once for the whole room: spaces only, and quote the value. |
+| Bio silently missing from the site | They saved `firstname-lastname.yaml`. The loader reads `*.y*ml`, so it reports `filename must be lowercase 'firstname-lastname.yml' (letters, digits and hyphens only)` instead of ignoring it — have them rename to `.yml`. |
 | Merge conflict | Should be impossible — one new file per student. It means they edited someone else's bio, `site.yml`, or a repo file. Have them revert that file and re-push. |
 | Docker will not start | Send them down the no-Docker path: `python3 -m venv .venv`, `pip install -r requirements.txt`, `python -m generator serve` on http://localhost:8000. |
 | Linear issue did not move | The issue ID is missing from the branch name. Rename the branch from Linear's copied name and re-push. |
