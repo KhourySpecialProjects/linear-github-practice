@@ -80,8 +80,11 @@ table.
 Open your file and edit it. Nothing needs deleting to make it parse — the
 template is valid YAML as it ships, and the `#` lines are YAML comments.
 
-- Set `name`, `team` (Team Falcon, Team Kestrel, Team Osprey or Team Harrier)
-  and `headline` (90 characters maximum).
+- Set `name` and `headline` (90 characters maximum), and set `team` to the one
+  named on your Linear issue. It must match a team in
+  [`../site.yml`](../site.yml) — as shipped: Team Falcon, Team Kestrel, Team
+  Osprey, Team Harrier, Team Merlin, Team Goshawk, Team Kite, Team Caracara,
+  Team Peregrine, Team Condor, Team Eagle. Case does not matter; spelling does.
 - Replace the `about` text with 40–2000 characters about you. Keep the
   `about: |` line and keep your text indented two spaces under it; it is
   rendered as Markdown, so `**bold**`, links and `-` lists work.
@@ -168,7 +171,8 @@ You are also somebody's reviewer. The roster is a ring: student *n* reviews
 student *n+1*, and the last student reviews the first. Open their PR, read
 **Files changed**, and check:
 
-- the file has `name`, `team`, `headline` and `about`; team is one of the four
+- the file has `name`, `team`, `headline` and `about`; `team` is one of the
+  teams listed in `site.yml`
 - the filename matches their name and ends in `.yml`
 - `about` reads professionally and is a sentence or two, not a placeholder
 - no files outside `bios/` were touched
@@ -223,6 +227,16 @@ Wrap the whole value in quotes:
 **You saved it as `.yaml`.** The extension is `.yml`. A `.yaml` file is
 reported as `filename must be lowercase 'firstname-lastname.yml' (letters,
 digits and hyphens only)` rather than being silently skipped.
+
+**Your card shows up under "Unassigned", or with placeholder text where your
+headline or bio should be.** The generator could not read part of your file, so
+it substituted fallback values: a `team` that does not match `site.yml` lands
+in a trailing **Unassigned** group, a missing `headline` renders as
+`Bio still needs a headline`, and an unreadable `about` renders a placeholder
+telling readers to run the validator. The site stays up so one bad file does
+not hide everybody's cards. It does not let you off: `validate` fails on every
+one of those substitutions, so CI is still red and the fix is still yours. Run
+`python -m generator validate`, fix what it names, push.
 
 **Merge conflict.** You should not get one. Your PR adds one brand-new file that
 nobody else touches, and `site.yml` is instructor-owned, so there is no shared

@@ -21,8 +21,8 @@ missing from your branch name. -->
 
 Check these four things, then Approve or Request changes:
 
-- [ ] Required keys present: `name`, `team`, `headline`, `about`; team is one of
-      Team Falcon / Team Kestrel / Team Osprey / Team Harrier
+- [ ] Required keys present: `name`, `team`, `headline`, `about`; `team` is one
+      of the teams listed in `site.yml`
 - [ ] Filename matches the author's name and ends in `.yml`
 - [ ] `about` reads professionally — a real sentence or two, no placeholder text
 - [ ] No files outside this author's own bio were touched

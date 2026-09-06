@@ -81,6 +81,7 @@
     Nothing matches that search. Try a shorter word, or clear the team filters.
   </p>
 
+  <div class="teams">
   {% for group in groups %}
   <section
     class="team"
@@ -146,6 +147,7 @@
     {% endif %}
   </section>
   {% endfor %}
+  </div>
 </div>
 {% endif %}
 {% endblock %}

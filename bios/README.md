@@ -58,7 +58,7 @@ fun_fact: Has opinions about the correct number of terminal tabs.
 | Key | Type | Required | Limits |
 |---|---|---|---|
 | `name` | string | yes | filename must equal its slug + `.yml` |
-| `team` | string | yes | one of Team Falcon, Team Kestrel, Team Osprey, Team Harrier (case-insensitive) |
+| `team` | string | yes | one of the teams listed in [`../site.yml`](../site.yml), matched case-insensitively — see [Teams](#teams) |
 | `headline` | string | yes | 90 characters maximum |
 | `about` | Markdown block scalar (`about: \|`) | yes | 40–2000 characters; script/iframe/object/embed tags and javascript URLs are rejected |
 | `pronouns` | string | no | — |
@@ -70,6 +70,19 @@ fun_fact: Has opinions about the correct number of terminal tabs.
 
 Any key that is not in that table is a validation error. Copy
 [`TEMPLATE.yml`](./TEMPLATE.yml) and you start with the shape already correct.
+
+### Teams
+
+`team` must match one of the teams in [`../site.yml`](../site.yml), which the
+instructor owns. As shipped those are:
+
+Team Falcon, Team Kestrel, Team Osprey, Team Harrier, Team Merlin, Team
+Goshawk, Team Kite, Team Caracara, Team Peregrine, Team Condor, Team Eagle.
+
+Matching ignores case and surrounding whitespace. Your Linear issue names the
+team you belong to. If your instructor renamed, added or removed a team,
+`site.yml` is the list that counts — read it there rather than trusting this
+paragraph.
 
 ### About `about`
 
@@ -118,6 +131,17 @@ copy.
 On a pull request the same message appears as an inline annotation on your file
 in the **Files changed** tab. Fix it on your branch, commit, push — the PR and
 CI update themselves.
+
+### A broken file still renders — you still have to fix it
+
+If your file cannot be read, the generator substitutes fallback values instead
+of dropping your card: a `team` that is not in `site.yml` puts you in a
+trailing **Unassigned** group, a missing `headline` renders as
+`Bio still needs a headline`, and an unreadable `about` renders a placeholder
+telling the reader to run the validator. That exists so one merged mistake does
+not blank the site for the whole class. It is not a way around validation — CI
+runs `validate`, which fails on every one of those substitutions, so your pull
+request stays red until the file is right.
 
 ## Preview before you push
 

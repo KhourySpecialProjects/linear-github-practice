@@ -99,7 +99,8 @@ must not be rushed, because it is the part they have never done before.
 |---|---|
 | Student blocked waiting on a reviewer (absent, slow, or stuck on their own bio) | Approve the PR yourself. Nobody waits more than two minutes on the ring. |
 | Ring broken by an absent student | Re-point the orphaned author at the next present student in the ring and say so out loud; do not re-generate the ring mid-class. |
-| CI red at minute 45 | Two options: read the annotation with them and fix it in 30 seconds, or admin-bypass the merge and have them fix it in a follow-up PR. Bypassing on purpose, out loud, is a better lesson than a stalled room. |
+| CI red at minute 45 | Two options: read the annotation with them and fix it in 30 seconds, or admin-bypass the merge and have them fix it in a follow-up PR. Bypassing on purpose, out loud, is a better lesson than a stalled room — and it does not break the site, because `build` is not strict (see below). |
+| A bypassed bio is degraded on the deployed site | Expected, not broken. The bio renders with fallback values: under **Unassigned** if the `team` is wrong or missing, with `Bio still needs a headline` or a placeholder `about` if those could not be read. The Coolify deploy log carries the warning. The fix is the student's follow-up PR. |
 | CI red for everyone at once | Something is wrong with the repo, not the students: check `site.yml` parses and the last merge to `testing` is green. Fall back to local `python -m generator validate` as the gate and merge with admin bypass. |
 | Student finishes early | Have them review a second PR (a real review, not a rubber stamp), or improve their `about` copy and push an update so they exercise re-request review. |
 | YAML indentation wave | A tab in the indentation gives `indented with a tab - YAML only allows spaces, so replace tabs with two spaces`; an unquoted value containing `': '` gives `invalid YAML at line N: mapping values are not allowed here - a value containing ': ' must be wrapped in quotes`. Demo both fixes once for the whole room: spaces only, and quote the value. |
@@ -108,6 +109,38 @@ must not be rushed, because it is the part they have never done before.
 | Docker will not start | Send them down the no-Docker path: `python3 -m venv .venv`, `pip install -r requirements.txt`, `python -m generator serve` on http://localhost:8000. |
 | Linear issue did not move | The issue ID is missing from the branch name. Rename the branch from Linear's copied name and re-push. |
 | Deploy does not appear | Check the Coolify deployment log on the projector — a slow deploy is a teaching moment, not a failure. |
+
+## When you bypass a straggler at minute 45
+
+Merging a red pull request with admin bypass does not take the site down. Know
+exactly why, so you can say it out loud instead of guessing.
+
+The merge to `testing` fires the Coolify webhook like any other merge, and the
+image build runs `python -m generator build` — deliberately **not**
+`--strict`. The bad file is repaired with fallback values, every other card is
+unaffected, and the build exits 0 after printing a warning. Coolify's deploy
+log shows it:
+
+```
+warning: 1 problem(s) in bios/; 1 bio(s) rendered with fallback values:
+  bios/jane-doe.yml: team 'Team Flacon' is not one of the course teams - use one of: Team Falcon, Team Kestrel, Team Osprey, Team Harrier, Team Merlin, Team Goshawk, Team Kite, Team Caracara, Team Peregrine, Team Condor, Team Eagle
+The site was built anyway. Run 'python -m generator validate' to treat these as failures, which is what CI does on every pull request.
+```
+
+Then the usual `Built N page(s) for M bio(s) into /dist/` line. That warning is
+how you spot a degraded bio after class: grep the deploy log for `warning:`.
+
+On the site itself the card is visibly degraded rather than missing. A wrong or
+missing `team` groups it under a trailing **Unassigned** heading after the real
+teams; a missing `headline` reads `Bio still needs a headline`; an `about` that
+could not be read reads as a placeholder pointing at the validator.
+
+The fix is a follow-up PR from that student. It is gated by `validate-bios`
+like every other PR, so it cannot merge until the file is right, and the next
+deploy moves the card into its real team. Put the degraded card on the
+projector while you are there — the site survived, the mistake is visible, and
+it is still somebody's job — then make sure the follow-up PR actually lands
+before the room empties.
 
 ## Debrief (minutes 48–50)
 
@@ -135,4 +168,7 @@ and what did you look at when you reviewed someone else's PR.
 - [ ] Confirm every issue in LGH is **Done**; chase the ones that are not.
 - [ ] Merge or close any leftover PRs; delete stale branches.
 - [ ] Confirm the deployed site lists everyone.
+- [ ] Confirm nothing is left under **Unassigned** and the last deploy log has
+      no `warning:` line; if it does, chase that student's follow-up PR. Locally:
+      `python -m generator validate`.
 - [ ] Note the timings that slipped, and adjust the pre-class Docker check.

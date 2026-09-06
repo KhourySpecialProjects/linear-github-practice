@@ -1,6 +1,12 @@
-# Instructor-owned: instructors edit this file, students never do (students only add bios/<slug>.md).
+# Instructor-owned: instructors edit this file, students never do (students only
+# add bios/<slug>.yml). Add, remove or rename teams freely - nothing in the code
+# hardcodes how many there are, and the site groups by whatever is listed here,
+# in this order.
+#
+# A bio whose `team` does not match one of these names still renders, in a
+# trailing "Unassigned" group, and `python -m generator validate` reports it.
 title: Khoury Practicum Bios
-tagline: One Markdown file per teammate, shipped through the same review workflow we use all semester.
+tagline: One YAML file per teammate, shipped through the same review workflow we use all semester.
 course: Khoury Practicum · Fall 2026
 footer: Northeastern University · Khoury College of Computer Sciences · built from the testing branch
 teams:
@@ -16,3 +22,24 @@ teams:
   - name: Team Harrier
     tagline: Platform work that nobody has to think about
     accent: "#3b82f6"
+  - name: Team Merlin
+    tagline: Small tools, sharp edges filed off
+    accent: "#ec4899"
+  - name: Team Goshawk
+    tagline: Reads the whole diff before commenting
+    accent: "#22c55e"
+  - name: Team Kite
+    tagline: Prototypes first, opinions second
+    accent: "#f59e0b"
+  - name: Team Caracara
+    tagline: Integrations and the glue nobody volunteers for
+    accent: "#8b5cf6"
+  - name: Team Peregrine
+    tagline: Performance work and honest benchmarks
+    accent: "#06b6d4"
+  - name: Team Condor
+    tagline: Long-range planning, short pull requests
+    accent: "#ef4444"
+  - name: Team Eagle
+    tagline: Ships the unglamorous last ten percent
+    accent: "#14b8a6"

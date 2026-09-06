@@ -20,16 +20,19 @@ COPY generator/ ./generator/
 COPY bios/ ./bios/
 COPY site.yml ./site.yml
 
-# `python -m generator build` exits non-zero when any bio file fails validation,
-# and a non-zero RUN fails the image build. So a malformed bio never ships.
+# Deliberately NOT --strict. A bio file that got merged with a bad team name or
+# broken YAML renders with fallback values and a build warning, so the deployed
+# site degrades by one card instead of failing to build at all. The hard gate
+# lives in CI: .github/workflows/ci.yml runs `generator validate` on every pull
+# request, so a broken bio cannot reach the testing branch through review.
 RUN python -m generator build --bios bios --config site.yml --out /dist
 
 # ---------------------------------------------------------------- stage 2 ----
 FROM nginx:1.27-alpine-slim
 
 LABEL org.opencontainers.image.title="Bio Aggregator" \
-      org.opencontainers.image.description="Static professional bio site generated from Markdown in bios/." \
-      org.opencontainers.image.source="https://github.com/khoury-practicum/linear-github-practice"
+      org.opencontainers.image.description="Static professional bio site generated from YAML in bios/." \
+      org.opencontainers.image.source="https://github.com/KhourySpecialProjects/linear-github-practice"
 
 COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /dist /usr/share/nginx/html

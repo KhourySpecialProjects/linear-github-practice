@@ -23,7 +23,11 @@ STATIC_DIR = PACKAGE_ROOT / "static"
 
 
 class BuildError(Exception):
-    """Raised when a build is asked to proceed despite invalid bio files."""
+    """Raised when a strict build is asked to proceed despite invalid bio files."""
+
+    def __init__(self, problems: tuple[Problem, ...]) -> None:
+        super().__init__("\n".join(str(problem) for problem in problems))
+        self.problems = problems
 
 
 @dataclass(frozen=True, slots=True)
@@ -44,17 +48,28 @@ class BuildResult:
     bios: int
     pages: int
     problems: tuple[Problem, ...]
+    #: How many rendered bios needed at least one fallback value.
+    salvaged: int
 
 
 def group_by_team(config: SiteConfig, bios: tuple[Bio, ...]) -> tuple[TeamGroup, ...]:
-    """Group bios in ``site.yml`` team order."""
+    """Group bios in ``site.yml`` team order.
+
+    Bios whose team could not be resolved land in a trailing fallback group so
+    they are still reachable on the site instead of vanishing.
+    """
     buckets: dict[str, list[Bio]] = {team.name: [] for team in config.teams}
+    orphans: list[Bio] = []
     for bio in bios:
-        buckets.setdefault(bio.team, []).append(bio)
-    return tuple(
-        TeamGroup(team=team, bios=tuple(buckets.get(team.name, ())))
+        buckets.get(bio.team, orphans).append(bio)
+
+    groups = [
+        TeamGroup(team=team, bios=tuple(buckets[team.name]))
         for team in config.teams
-    )
+    ]
+    if orphans:
+        groups.append(TeamGroup(team=config.fallback_team, bios=tuple(orphans)))
+    return tuple(groups)
 
 
 def _environment() -> Environment:
@@ -73,13 +88,19 @@ def _write(path: Path, content: str) -> None:
     path.write_text(content, encoding="utf-8")
 
 
-def build(bios_dir: Path, config: SiteConfig, out_dir: Path, *, strict: bool = True) -> BuildResult:
-    """Build the whole site. Invalid bio files fail the build unless ``strict`` is off."""
+def build(bios_dir: Path, config: SiteConfig, out_dir: Path, *, strict: bool = False) -> BuildResult:
+    """Build the whole site.
+
+    Broken bio files render with fallback values and are reported in
+    ``BuildResult.problems``; pass ``strict=True`` to refuse instead. The
+    deploy path is deliberately lenient so one bad file cannot empty the site.
+    """
     bios, problems = load_bios(bios_dir, config)
     if problems and strict:
-        raise BuildError("\n".join(str(problem) for problem in problems))
+        raise BuildError(problems)
 
     groups = group_by_team(config, bios)
+    configured = {team.name for team in config.teams}
     env = _environment()
     built_at = datetime.now(timezone.utc)
     shared = {
@@ -88,8 +109,10 @@ def build(bios_dir: Path, config: SiteConfig, out_dir: Path, *, strict: bool = T
         "built_at_label": built_at.strftime("%d %b %Y, %H:%M UTC"),
         "stats": {
             "bios": len(bios),
-            "teams": sum(1 for group in groups if group.count),
-            "total_teams": len(groups),
+            # Only real teams count as represented; the Unassigned bucket is a
+            # defect list, not a twelfth team.
+            "teams": sum(1 for group in groups if group.count and group.team.name in configured),
+            "total_teams": len(config.teams),
         },
     }
 
@@ -117,4 +140,10 @@ def build(bios_dir: Path, config: SiteConfig, out_dir: Path, *, strict: bool = T
     if STATIC_DIR.is_dir():
         shutil.copytree(STATIC_DIR, out_dir / "assets", dirs_exist_ok=True)
 
-    return BuildResult(out_dir=out_dir, bios=len(bios), pages=pages, problems=problems)
+    return BuildResult(
+        out_dir=out_dir,
+        bios=len(bios),
+        pages=pages,
+        problems=problems,
+        salvaged=sum(1 for bio in bios if bio.salvaged),
+    )

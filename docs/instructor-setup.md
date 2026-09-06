@@ -148,15 +148,66 @@ teams:
     accent: "#7c5cff"
 ```
 
-Shipped teams are Team Falcon (`#7c5cff`), Team Kestrel (`#00b6a4`), Team Osprey
-(`#ff7a45`) and Team Harrier (`#3b82f6`). A bio's `team` must match one of these
-names (case-insensitively), so if you rename a team, rename it *before* the
-roster CSV goes out — and re-run `python -m generator validate` afterwards,
-since existing bios will fail against a renamed team.
+Shipped teams, in the order the site groups them: Team Falcon (`#7c5cff`), Team
+Kestrel (`#00b6a4`), Team Osprey (`#ff7a45`), Team Harrier (`#3b82f6`), Team
+Merlin (`#ec4899`), Team Goshawk (`#22c55e`), Team Kite (`#f59e0b`), Team
+Caracara (`#8b5cf6`), Team Peregrine (`#06b6d4`), Team Condor (`#ef4444`) and
+Team Eagle (`#14b8a6`).
+
+**The team count is not fixed anywhere in the code.** Teams are data: add,
+rename or remove them by editing `site.yml` alone, in any number and any order,
+and the site regroups on the next build. Nothing in `generator/` knows there
+are eleven, and `site.yml` is the only list a bio's `team` is checked against.
+
+A bio's `team` must match one of those names (case-insensitively), so if you
+rename a team, rename it *before* the roster CSV goes out — and re-run
+`python -m generator validate` afterwards, since existing bios will fail
+against a renamed team. They will not disappear from the site: a bio whose
+`team` no longer resolves renders in a trailing **Unassigned** group instead
+(see below).
 
 Also update `title`, `tagline`, `course` and `footer` for the term.
 
-## 7. Seed one worked example
+## 7. Strict where it teaches, resilient where it deploys
+
+One rule, two behaviours: the check that grades a pull request is strict, and
+the build that ships the site is not. A student's bad bio still turns their PR
+red, and a bad bio that got merged anyway degrades one card instead of taking
+the whole site down.
+
+| Command or file | Behaviour on a problem | Why |
+|---|---|---|
+| `python -m generator validate` | Prints every problem, exits **1** | The gate. This is what CI runs on every pull request, so the review lesson is intact. |
+| `python -m generator build` | Substitutes fallback values, prints a **warning**, exits **0** | The deployed site must survive one bad file that got merged — for example via your admin bypass at minute 45. |
+| `python -m generator build --strict` | Exits **1**, renders nothing | Opt-in for anyone who wants a build to fail. `serve` takes `--strict` too. |
+| `Dockerfile` | Runs `build` **without** `--strict` | On purpose: a deploy cannot be taken down by one malformed bio. |
+| `.github/workflows/ci.yml`, job `validate-bios` | Runs `validate` | Unchanged — still the hard gate on `testing`. |
+
+### Spotting a degraded bio
+
+A resilient build is loud, not silent. It prints, to stderr:
+
+```
+warning: 1 problem(s) in bios/; 1 bio(s) rendered with fallback values:
+  bios/jane-doe.yml: team 'Team Flacon' is not one of the course teams - use one of: Team Falcon, Team Kestrel, Team Osprey, Team Harrier, Team Merlin, Team Goshawk, Team Kite, Team Caracara, Team Peregrine, Team Condor, Team Eagle
+The site was built anyway. Run 'python -m generator validate' to treat these as failures, which is what CI does on every pull request.
+```
+
+That warning appears in Coolify's deploy log for the deploy that shipped it, so
+the log is where you check after class. On the site, a bio whose `team` did not
+resolve is grouped under a trailing **Unassigned** heading after your real
+teams; `Unassigned` is not in `site.yml` and you never add it. A field that
+could not be read shows placeholder text — `Bio still needs a headline`, or an
+`about` that tells the reader to run the validator.
+
+To see every problem as a failure, at any time:
+
+```sh
+python -m generator validate
+python -m generator build --strict     # same verdict, and renders nothing
+```
+
+## 8. Seed one worked example
 
 Merge one real bio through the full workflow yourself — issue, branch, PR,
 self-approve with admin bypass, squash merge — before class. It proves the whole
@@ -168,6 +219,7 @@ it.
 - [ ] `gh repo view KhourySpecialProjects/linear-github-practice --json defaultBranchRef` reports `testing`
 - [ ] A test PR into `testing` cannot merge without 1 approval and both checks
 - [ ] `validate-bios` fails on a deliberately broken bio and annotates the file
+- [ ] `python -m generator build` on that same broken bio exits 0 with a `warning:` line, and `python -m generator build --strict` exits 1
 - [ ] Pushing to `testing` triggers a Coolify deploy and `<deployed-url>` serves the site
 - [ ] A test branch named `lgh-1-...` moves its Linear issue automatically
 - [ ] Every student can see the repo and has accepted their invitation

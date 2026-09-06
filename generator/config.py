@@ -15,6 +15,10 @@ from .text import slugify
 
 DEFAULT_ACCENT = "#6366f1"
 
+#: Bios whose ``team`` cannot be resolved are grouped here instead of dropped.
+FALLBACK_TEAM_NAME = "Unassigned"
+FALLBACK_ACCENT = "#8b95a8"
+
 
 class ConfigError(Exception):
     """Raised when ``site.yml`` is missing or malformed."""
@@ -84,6 +88,20 @@ class SiteConfig:
             if team.name.casefold() == wanted:
                 return team
         return None
+
+    @property
+    def fallback_team(self) -> Team:
+        """The bucket for bios whose ``team`` could not be resolved.
+
+        Synthetic rather than configured: an instructor should not have to
+        remember to add it, and a bio landing here is a defect to fix, not a
+        team to plan around. It renders after the real teams.
+        """
+        return Team(
+            name=FALLBACK_TEAM_NAME,
+            tagline="Team field missing or misspelled - fix the 'team' value in the bio file",
+            accent=FALLBACK_ACCENT,
+        )
 
     @property
     def team_names(self) -> tuple[str, ...]:

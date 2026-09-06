@@ -413,13 +413,25 @@ code {
 
 /* ---------- teams + card wall ---------- */
 
+/* A roster of 11 teams holding one or two bios each is the normal shape here,
+ * so team panels flow in a grid instead of each reserving a full-width row.
+ * One column on narrow screens keeps the reading order intact.
+ */
+.teams {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr));
+  gap: clamp(1rem, 0.5rem + 1vw, 1.75rem);
+  align-items: start;
+}
+
 .team {
-  padding-block: clamp(1.5rem, 1rem + 1.5vw, 2.5rem);
+  padding-block: clamp(1.25rem, 1rem + 0.6vw, 1.75rem);
   border-top: 1px solid var(--border);
 }
 
-.team:first-of-type {
-  border-top: 0;
+/* Every panel keeps its rule when they sit side by side. */
+.teams > .team:first-of-type {
+  border-top: 1px solid var(--border);
 }
 
 .team__head {
@@ -427,7 +439,7 @@ code {
   align-items: baseline;
   flex-wrap: wrap;
   gap: 0.4rem 0.9rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.9rem;
 }
 
 .team__name {

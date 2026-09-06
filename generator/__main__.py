@@ -17,7 +17,7 @@ from pathlib import Path
 
 from .bios import Problem, load_bios
 from .config import ConfigError, SiteConfig
-from .render import build
+from .render import BuildError, build
 
 
 def _add_common_args(parser: argparse.ArgumentParser) -> None:
@@ -49,12 +49,32 @@ def _validate(args: argparse.Namespace, config: SiteConfig) -> int:
 
 
 def _build(args: argparse.Namespace, config: SiteConfig) -> int:
-    bios, problems = load_bios(args.bios, config)
-    if problems:
-        print(f"{len(problems)} problem(s) found in {args.bios}/:", file=sys.stderr)
-        _report(problems)
+    """Render the site.
+
+    A broken bio file degrades to fallback values and a warning rather than
+    failing the build: the deployed site must survive one bad file that got
+    merged. Use --strict (or `validate`, which CI runs on every pull request)
+    when a problem should stop the line instead.
+    """
+    try:
+        result = build(args.bios, config, args.out, strict=args.strict)
+    except BuildError as exc:
+        print(f"{len(exc.problems)} problem(s) found in {args.bios}/:", file=sys.stderr)
+        _report(exc.problems)
         return 1
-    result = build(args.bios, config, args.out, strict=False)
+
+    if result.problems:
+        print(
+            f"warning: {len(result.problems)} problem(s) in {args.bios}/; "
+            f"{result.salvaged} bio(s) rendered with fallback values:",
+            file=sys.stderr,
+        )
+        _report(result.problems)
+        print(
+            "The site was built anyway. Run 'python -m generator validate' to treat "
+            "these as failures, which is what CI does on every pull request.",
+            file=sys.stderr,
+        )
     print(f"Built {result.pages} page(s) for {result.bios} bio(s) into {result.out_dir}/")
     return 0
 
@@ -85,12 +105,18 @@ def main(argv: list[str] | None = None) -> int:
     build_cmd = subparsers.add_parser("build", help="render the static site")
     _add_common_args(build_cmd)
     build_cmd.add_argument("--out", type=Path, default=Path("dist"), help="output directory")
+    build_cmd.add_argument(
+        "--strict",
+        action="store_true",
+        help="refuse to build when any bio file has problems (default: substitute fallbacks and warn)",
+    )
     build_cmd.set_defaults(handler=_build)
 
     serve = subparsers.add_parser("serve", help="build, then serve the site locally")
     _add_common_args(serve)
     serve.add_argument("--out", type=Path, default=Path("dist"), help="output directory")
     serve.add_argument("--port", type=int, default=8000, help="port to serve on")
+    serve.add_argument("--strict", action="store_true", help="refuse to build when any bio file has problems")
     serve.set_defaults(handler=_serve)
 
     args = parser.parse_args(argv)

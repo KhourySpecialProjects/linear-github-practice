@@ -38,7 +38,13 @@ python -m generator build      # render the site into dist/
 ```
 
 `validate` exits non-zero and prints one actionable line per problem, naming the
-file and the fix.
+file and the fix. `build` is the forgiving one — see below — and takes
+`--strict` when a problem should fail the build instead:
+
+```sh
+python -m generator build --strict
+python -m generator serve --strict
+```
 
 ## How the site is built
 
@@ -47,8 +53,14 @@ file and the fix.
 The build reads every `bios/*.yml` (skipping `TEMPLATE.yml`), validates it,
 groups bios by the teams declared in `site.yml`, and writes `dist/index.html`,
 `dist/404.html`, `dist/<slug>/index.html` and `dist/assets/**`. Whatever files
-are present at build time are the site — there is no database and no state. A
-broken bio fails the build rather than shipping a broken page.
+are present at build time are the site — there is no database and no state.
+
+A broken bio does not disappear. `build` substitutes fallback values, prints a
+`warning:` line and still exits 0, so one bad file degrades one card instead of
+taking the whole site down; the Dockerfile deliberately builds without
+`--strict` for that reason. `python -m generator validate`, which CI runs on
+every pull request, still fails on every one of those substitutions. Details:
+[Instructor setup](docs/instructor-setup.md#7-strict-where-it-teaches-resilient-where-it-deploys).
 
 A bio file is structured data: `name`, `team`, `headline` and the optional
 fields are plain YAML values. The one prose field is `about`, a YAML block
@@ -73,7 +85,7 @@ generator/                   the static site generator (instructor-owned; studen
   static/                    CSS and assets, copied to dist/assets/
 scripts/roster.py            generates Linear issue text and the review ring from a roster CSV
 roster.example.csv           the roster CSV shape: name,github,team
-site.yml                     site title, tagline, footer and the four teams (instructor-owned)
+site.yml                     site title, tagline, footer and the team list (instructor-owned)
 tests/                       tests for the validation rules
 Dockerfile                   build the site, serve it with nginx
 deploy/nginx.conf            the nginx config baked into the image
