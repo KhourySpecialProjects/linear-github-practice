@@ -4,11 +4,13 @@ Follow this page start to finish during class. It is the whole exercise: one
 Linear issue, one branch, one file, one pull request, one review, one merge.
 
 The workflow rules themselves live in the playbooks — this page only tells you
-what to do in *this* repository, and links to the playbook for each step. The
-playbooks are the sibling repo `practicum-playbooks` (also published to you
-separately); links below assume it is cloned next to this one.
+what to do in *this* repository, and links to the playbook for each step. Every
+playbook link goes to
+[KhourySpecialProjects/practicum-playbooks](https://github.com/KhourySpecialProjects/practicum-playbooks).
+That repo is private, so if a link 404s for you, you have not been granted
+access yet — say so and it will be fixed.
 
-[Developer Expectations](../../practicum-playbooks/developer-expectations.md) is
+[Developer Expectations](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/developer-expectations.md) is
 the source of truth for branches, commits, PRs and review. If this page and that
 page ever disagree, that page wins.
 
@@ -40,7 +42,7 @@ There is no `staging`, no `production`, and no `main` here. You branch from
 
 Open the LGH project in Linear, find **Add bio for &lt;Your Name&gt;**, assign it to
 yourself, and read the description — it names **the person you must request as
-your reviewer**. Playbook: [Start an Issue](../../practicum-playbooks/start-an-issue.md).
+your reviewer**. Playbook: [Start an Issue](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/start-an-issue.md).
 
 ### 2. Copy the branch name from Linear
 
@@ -123,14 +125,14 @@ git push
 ```
 
 Imperative mood, one file. Playbook:
-[Working on Your Branch](../../practicum-playbooks/working-on-your-branch.md).
+[Working on Your Branch](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/working-on-your-branch.md).
 
 ### 8. Open the pull request
 
 On GitHub, open a PR with **base = `testing`**, compare = your branch. The PR
 template fills in the checklist; tick it honestly. The Linear issue links itself
 because the branch carries `lgh-12`. Playbook:
-[Open a Pull Request](../../practicum-playbooks/open-a-pull-request.md).
+[Open a Pull Request](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/open-a-pull-request.md).
 
 Then, in the **Reviewers** panel, request **the reviewer named on your Linear
 issue**. Not a friend, not whoever is nearest — the assigned one.
@@ -147,14 +149,14 @@ student *n+1*, and the last student reviews the first. Open their PR, read
 - no files outside `bios/` were touched
 
 Approve when it is good enough to ship. Playbook:
-[Reviewing a Pull Request](../../practicum-playbooks/reviewing-a-pull-request.md).
+[Reviewing a Pull Request](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/reviewing-a-pull-request.md).
 
 ### 10. Address feedback, then squash and merge
 
 Fix or reply to every comment, push, resolve the threads, re-request review.
 When you have one approval and green CI, use **Squash and merge**, then
 **Delete branch**. Playbook:
-[Respond to Review and Merge](../../practicum-playbooks/respond-to-review-and-merge.md).
+[Respond to Review and Merge](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/respond-to-review-and-merge.md).
 
 ### 11. Confirm Linear and watch the deploy
 
@@ -179,7 +181,7 @@ push — the PR re-runs itself.
 nobody else touches, and `site.yml` is instructor-owned, so there is no shared
 file to collide on. If you somehow do have a conflict, you probably edited
 someone else's bio or a repo file — undo that; see
-[Working on Your Branch](../../practicum-playbooks/working-on-your-branch.md).
+[Working on Your Branch](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/working-on-your-branch.md).
 
 **You started on the wrong branch** (you edited files while on `testing`, and
 have not committed). Take the work with you:

@@ -104,10 +104,10 @@ stops at the first deployed environment.
 
 Workflow playbooks (sibling repo, also published to students separately):
 
-- [Developer Expectations](../practicum-playbooks/developer-expectations.md) — the source of truth
-- [Start an Issue](../practicum-playbooks/start-an-issue.md)
-- [Working on Your Branch](../practicum-playbooks/working-on-your-branch.md)
-- [Open a Pull Request](../practicum-playbooks/open-a-pull-request.md)
-- [Reviewing a Pull Request](../practicum-playbooks/reviewing-a-pull-request.md)
-- [Respond to Review and Merge](../practicum-playbooks/respond-to-review-and-merge.md)
-- [Environments & Deployment](../practicum-playbooks/environments-and-deployment.md)
+- [Developer Expectations](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/developer-expectations.md) — the source of truth
+- [Start an Issue](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/start-an-issue.md)
+- [Working on Your Branch](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/working-on-your-branch.md)
+- [Open a Pull Request](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/open-a-pull-request.md)
+- [Reviewing a Pull Request](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/reviewing-a-pull-request.md)
+- [Respond to Review and Merge](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/respond-to-review-and-merge.md)
+- [Environments & Deployment](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/environments-and-deployment.md)

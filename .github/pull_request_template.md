@@ -27,4 +27,4 @@ Check these four things, then Approve or Request changes:
 - [ ] Body reads professionally — a real sentence or two, no placeholder text
 - [ ] No files outside this author's own bio were touched
 
-Verdicts and etiquette: [Reviewing a Pull Request](../../practicum-playbooks/reviewing-a-pull-request.md).
+Verdicts and etiquette: [Reviewing a Pull Request](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/reviewing-a-pull-request.md).

@@ -11,6 +11,13 @@ Coolify app, and the two files you own. Class-day choreography is in
 | `KhourySpecialProjects/linear-github-practice` | repo slug | The org is assumed to be `KhourySpecialProjects` (where `practicum-playbooks` lives). Confirm before you create the repo. |
 | `<deployed-url>` | Coolify domain for this app | Assigned when you create the Coolify application; paste it back into this file and give it to students. |
 
+Also confirm before class: `practicum-playbooks` is a **private** repo, and
+every playbook link in this repo points at
+`https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/...`.
+Students must have read access to it, or those links 404 for them. Grant it the
+same way you grant this repo — see
+[Onboarding](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/onboarding.md).
+
 Everything else below is concrete.
 
 ## Goal
@@ -105,7 +112,7 @@ Settings -> General -> Pull Requests:
   the `lgh-12` prefix moves the issue to **In Progress** when the branch is
   pushed, **In Review** when the PR opens, and **Done** when it merges. Nobody
   pastes an issue ID by hand. See
-  [Developer Expectations](../../practicum-playbooks/developer-expectations.md).
+  [Developer Expectations](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/developer-expectations.md).
 
 ## 4. Coolify
 
@@ -119,12 +126,12 @@ Settings -> General -> Pull Requests:
 6. Deploy once now and load the URL. No environment variables or secrets are
    needed — the site is static and everything it renders is in the repo.
 
-Background: [Environments & Deployment](../../practicum-playbooks/environments-and-deployment.md).
+Background: [Environments & Deployment](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/environments-and-deployment.md).
 
 ## 5. Optional: Blacksmith runners
 
 If this repo should run its Actions on Blacksmith, follow
-[Blacksmith Setup](../../practicum-playbooks/blacksmith-setup.md): add the repo
+[Blacksmith Setup](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/blacksmith-setup.md): add the repo
 to the org app's approved list and update the workflow's `runs-on`. Not
 required — the exercise runs fine on GitHub-hosted runners, and the two checks
 take seconds.

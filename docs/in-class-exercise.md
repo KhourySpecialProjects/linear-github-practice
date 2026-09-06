@@ -24,12 +24,21 @@ By the end of the session every student has, once, for real:
    the merge.
 
 The rules behind all of this are in
-[Developer Expectations](../../practicum-playbooks/developer-expectations.md);
+[Developer Expectations](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/developer-expectations.md);
 the exercise exists to make students execute them once before the client work
 starts.
 
 ## Pre-class checklist
 
+- [ ] **Playbooks published.** Every playbook link in this repo points at
+      `KhourySpecialProjects/practicum-playbooks` on `main`. As of writing,
+      only `README.md`, `blacksmith-setup.md` and `onboarding.md` are on
+      `main` — the seven workflow playbooks students need most
+      (`start-an-issue`, `working-on-your-branch`, `open-a-pull-request`,
+      `reviewing-a-pull-request`, `respond-to-review-and-merge`,
+      `developer-expectations`, `environments-and-deployment`) are still
+      unpushed local files. Commit, merge to `main`, and confirm students have
+      read access, or those links 404 mid-exercise.
 - [ ] **Roster CSV** ready: `name,github,team` header, one row per student
       (`roster.example.csv` in the repo root shows the shape).
 - [ ] **Issue text and review ring generated**:
@@ -112,7 +121,7 @@ Three points, out loud:
 3. **This repo showed you the first environment of four.** Real projects promote
    Local -> Testing -> Staging -> Production, merging forward one step at a
    time, each merge auto-deploying its own environment; see
-   [Environments & Deployment](../../practicum-playbooks/environments-and-deployment.md).
+   [Environments & Deployment](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/environments-and-deployment.md).
    Today you did Local -> Testing. On your client project the same PR you just
    merged gets promoted twice more, which is why "merge to a protected branch"
    is a decision and not a keystroke.
