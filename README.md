@@ -16,8 +16,10 @@ cd linear-github-practice
 docker compose up --build
 ```
 
-Open http://localhost:8080. `Ctrl-C` stops it. Add `--watch` to rebuild when
-`bios/`, `site.yml` or `generator/` changes.
+Open http://localhost:8088. `Ctrl-C` stops it. Add `--watch` to rebuild when
+`bios/`, `site.yml` or `generator/` changes. Keep `--build`: the site is baked
+into the image, so a plain `docker compose up` re-serves the previous build.
+If something already owns port 8088, use `SITE_PORT=9090 docker compose up --build`.
 
 ## Without Docker
 
@@ -72,7 +74,7 @@ site.yml                     site title, tagline, footer and the four teams (ins
 tests/                       tests for the validation rules
 Dockerfile                   build the site, serve it with nginx
 deploy/nginx.conf            the nginx config baked into the image
-docker-compose.yml           local dev on http://localhost:8080
+docker-compose.yml           local dev on http://localhost:8088 (override with SITE_PORT)
 docker-compose.coolify.yml   what Coolify deploys from the testing branch
 .github/workflows/ci.yml     the validate-bios and build-site checks that guard testing
 requirements.txt             runtime dependencies

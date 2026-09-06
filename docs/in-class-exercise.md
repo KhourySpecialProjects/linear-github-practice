@@ -61,10 +61,10 @@ starts.
 - [ ] **One worked example already merged** — a bio on the deployed site — so
       students see the finished shape and the site is never empty.
 - [ ] **Local Docker verified** by each student in advance:
-      `docker compose up --build` then http://localhost:8080. Docker pulling
-      base images for the first time on classroom wifi is the single biggest
-      time sink; the no-Docker path (`python -m generator serve`) is the
-      fallback.
+      `docker compose up --build` then http://localhost:8088 (they can override
+      a busy port with `SITE_PORT=9090`). Docker pulling base images for the
+      first time on classroom wifi is the single biggest time sink; the
+      no-Docker path (`python -m generator serve`) is the fallback.
 - [ ] **Projector tabs open**: a Linear issue, the repo's Pull requests tab, the
       deployed site.
 

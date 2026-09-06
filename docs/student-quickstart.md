@@ -88,7 +88,14 @@ With Docker, from the repository root:
 docker compose up --build
 ```
 
-Open http://localhost:8080 and find your card. `Ctrl-C` stops it.
+Open http://localhost:8088 and find your card. `Ctrl-C` stops it.
+
+Two things that trip people up here:
+
+- **Keep `--build`.** The site is baked into the image, so a plain
+  `docker compose up` serves the previous build and your card will be missing.
+- **Port already allocated?** Something else on your machine owns 8088. Run
+  `SITE_PORT=9090 docker compose up --build` and open that port instead.
 
 Without Docker:
 
@@ -190,7 +197,7 @@ so you are not blocked.
 ## Verification
 
 - [ ] `python -m generator validate` exits without problems
-- [ ] Your card appears at http://localhost:8080 (or `:8000` without Docker)
+- [ ] Your card appears at http://localhost:8088 (or `:8000` without Docker)
 - [ ] The PR is base `testing`, one file changed, CI green, one approval
 - [ ] The PR you were assigned has your submitted review on it
 - [ ] The Linear issue is in **Done** and the branch is deleted

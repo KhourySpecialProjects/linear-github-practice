@@ -1,16 +1,20 @@
 # Local development. Two commands worth knowing:
 #
-#   docker compose up --build            # build once, serve on http://localhost:8080
+#   docker compose up --build            # build once, serve on http://localhost:8088
 #   docker compose up --build --watch    # same, but rebuild when bios/ changes
 #
-# The site is static, so there is nothing to configure: no env vars, no
-# secrets, no database.
+# The site is static: no secrets, no database. The only knob is the host port,
+# in case something already owns 8088 on your machine:
+#
+#   SITE_PORT=9090 docker compose up --build
+#
+# or put SITE_PORT=9090 in an untracked .env file, which Compose reads.
 services:
   site:
     build: .
     container_name: bio-site
     ports:
-      - "8080:80"
+      - "${SITE_PORT:-8088}:80"
     restart: unless-stopped
     develop:
       # A static site is baked into the image, so an edit means a rebuild --

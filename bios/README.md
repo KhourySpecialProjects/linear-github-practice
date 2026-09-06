@@ -65,7 +65,8 @@ With Docker, from the repository root:
 docker compose up --build
 ```
 
-Open http://localhost:8080. Stop with `Ctrl-C`.
+Open http://localhost:8088. Stop with `Ctrl-C`. Keep `--build` — the site is
+baked into the image, so a plain `docker compose up` re-serves the last build.
 
 Without Docker:
 
