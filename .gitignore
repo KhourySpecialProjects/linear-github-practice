@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+dist/
+.DS_Store
+.env
+
+# Local coding-agent config, not part of the project.
+.omp/
+
+# The real roster holds student names and GitHub handles, so it stays out of
+# git; roster.example.csv is committed as the shape to copy.
+roster.csv

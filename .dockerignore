@@ -1,0 +1,17 @@
+# Keep the build context small and the cache stable: anything listed here is
+# invisible to `docker build`, so touching it never busts a layer.
+.git
+.github
+.venv
+dist
+docs
+scripts
+tests
+__pycache__
+*.pyc
+.pytest_cache
+.DS_Store
+.omp
+README.md
+docker-compose*.yml
+roster*.csv

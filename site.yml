@@ -1,0 +1,18 @@
+# Instructor-owned: instructors edit this file, students never do (students only add bios/<slug>.md).
+title: Khoury Practicum Bios
+tagline: One Markdown file per teammate, shipped through the same review workflow we use all semester.
+course: Khoury Practicum · Fall 2026
+footer: Northeastern University · Khoury College of Computer Sciences · built from the testing branch
+teams:
+  - name: Team Falcon
+    tagline: Fast feedback, small pull requests
+    accent: "#7c5cff"
+  - name: Team Kestrel
+    tagline: Careful reviewers, calm releases
+    accent: "#00b6a4"
+  - name: Team Osprey
+    tagline: Data plumbing and sharp dashboards
+    accent: "#ff7a45"
+  - name: Team Harrier
+    tagline: Platform work that nobody has to think about
+    accent: "#3b82f6"

@@ -1,0 +1,120 @@
+{% extends "base.html.j2" %}
+{% block title %}{{ bio.name }} &middot; {{ site.title }}{% endblock %}
+{% block description %}{{ bio.headline }}{% endblock %}
+
+{% block content %}
+<article class="profile" style="--hue: {{ bio.hue }}{% if team %}; --accent: {{ team.accent }}{% endif %}">
+  <div class="wrap">
+    <p class="backlink"><a href="/">&larr; All bios</a></p>
+
+    <header class="profile__head">
+      {% if bio.avatar %}
+      <img class="avatar avatar--img avatar--xl" src="{{ bio.avatar }}" alt="" width="132" height="132" decoding="async" data-initials="{{ bio.initials }}">
+      {% else %}
+      <span class="avatar avatar--mono avatar--xl" aria-hidden="true">{{ bio.initials }}</span>
+      {% endif %}
+
+      <div class="profile__ident">
+        <h1 class="profile__name">
+          {{ bio.name }}
+          {% if bio.pronouns %}
+          <span class="profile__pronouns">({{ bio.pronouns }})</span>
+          {% endif %}
+        </h1>
+        <p class="profile__headline">{{ bio.headline }}</p>
+
+        <p class="profile__meta">
+          {% if team %}
+          <a class="badge" href="/#{{ team.slug }}">
+            <span class="badge__dot" aria-hidden="true"></span>{{ team.name }}
+          </a>
+          {% else %}
+          <span class="badge badge--plain">
+            <span class="badge__dot" aria-hidden="true"></span>{{ bio.team }}
+          </span>
+          {% endif %}
+          {% if bio.location %}
+          <span class="profile__location">{{ bio.location }}</span>
+          {% endif %}
+        </p>
+
+        {% if bio.focus %}
+        <p class="tags tags--lg">
+          {% for item in bio.focus %}
+          <span class="tag">{{ item }}</span>
+          {% endfor %}
+        </p>
+        {% endif %}
+      </div>
+    </header>
+
+    <div class="profile__body">
+      <div class="prose">
+        {{ bio.body_html }}
+      </div>
+
+      <aside class="sidebar" aria-label="More about {{ bio.name }}">
+        {% if bio.links %}
+        <section class="panel">
+          <h2 class="panel__title">Links</h2>
+          <ul class="linklist">
+            {% for link in bio.links %}
+            <li>
+              {% if link.url.startswith('mailto:') %}
+              <a class="linkbtn" href="{{ link.url }}">
+                <span class="linkbtn__label">{{ link.label }}</span>
+                <span class="linkbtn__icon" aria-hidden="true">&#9993;</span>
+              </a>
+              {% else %}
+              <a class="linkbtn" href="{{ link.url }}" target="_blank" rel="noopener noreferrer">
+                <span class="linkbtn__label">{{ link.label }}</span>
+                <span class="linkbtn__icon" aria-hidden="true">&#8599;</span>
+                <span class="visually-hidden">(opens in a new tab)</span>
+              </a>
+              {% endif %}
+            </li>
+            {% endfor %}
+          </ul>
+        </section>
+        {% endif %}
+
+        {% if bio.fun_fact %}
+        <section class="panel callout">
+          <h2 class="panel__title">Fun fact</h2>
+          <p class="callout__text">{{ bio.fun_fact }}</p>
+        </section>
+        {% endif %}
+
+        {% if team and team.tagline %}
+        <section class="panel">
+          <h2 class="panel__title">{{ team.name }}</h2>
+          <p class="panel__text">{{ team.tagline }}</p>
+        </section>
+        {% endif %}
+      </aside>
+    </div>
+
+    {% if teammates %}
+    <section class="teammates">
+      <h2 class="teammates__title">
+        {% if team %}More from {{ team.name }}{% else %}Teammates{% endif %}
+      </h2>
+      <ul class="teammates__list">
+        {% for mate in teammates %}
+        <li>
+          <a class="mate" href="{{ mate.url }}" style="--hue: {{ mate.hue }}">
+            {% if mate.avatar %}
+            <img class="avatar avatar--img avatar--sm" src="{{ mate.avatar }}" alt="" loading="lazy" decoding="async" width="36" height="36" data-initials="{{ mate.initials }}">
+            {% else %}
+            <span class="avatar avatar--mono avatar--sm" aria-hidden="true">{{ mate.initials }}</span>
+            {% endif %}
+            <span class="mate__name">{{ mate.name }}</span>
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+  </div>
+</article>
+{% endblock %}

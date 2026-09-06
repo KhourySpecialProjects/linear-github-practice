@@ -1,0 +1,24 @@
+# Local development. Two commands worth knowing:
+#
+#   docker compose up --build            # build once, serve on http://localhost:8080
+#   docker compose up --build --watch    # same, but rebuild when bios/ changes
+#
+# The site is static, so there is nothing to configure: no env vars, no
+# secrets, no database.
+services:
+  site:
+    build: .
+    container_name: bio-site
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    develop:
+      # A static site is baked into the image, so an edit means a rebuild --
+      # there is no live-reload to sync into.
+      watch:
+        - action: rebuild
+          path: ./bios
+        - action: rebuild
+          path: ./site.yml
+        - action: rebuild
+          path: ./generator

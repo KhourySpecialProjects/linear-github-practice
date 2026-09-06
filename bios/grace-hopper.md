@@ -1,0 +1,13 @@
+---
+name: Grace Hopper
+team: Team Kestrel
+headline: Compiler engineer who believes programming should read like English
+---
+
+I build the tools that let other people stop writing machine code. Most of my career
+has been spent arguing that a computer can translate human-readable instructions on
+our behalf, and then shipping the compiler that proves it.
+
+I am happiest reviewing someone else's design document, and I would rather ask a
+blunt question early than discover the answer during a release. It is easier to
+apologize than to get permission, but it is easier still to write the test first.

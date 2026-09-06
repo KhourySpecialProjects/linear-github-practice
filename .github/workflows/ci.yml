@@ -1,0 +1,73 @@
+name: CI
+
+# This is the status check that guards `testing`. It runs on every pull
+# request into `testing` and again on the merge commit.
+on:
+  pull_request:
+    branches: [testing]
+  push:
+    branches: [testing]
+
+# Push twice in a row and the first run is cancelled instead of queued.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # Half one: is every file in bios/ well formed? This is the job that fails
+  # when a bio is missing a required key or the filename does not match `name`.
+  validate-bios:
+    name: Validate bios
+    permissions:
+      contents: read
+    # Swapping to the line below requires this repo to be added to the org's
+    # Blacksmith app first (see ../practicum-playbooks/blacksmith-setup.md).
+    # runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Validate bio files
+        run: python -m generator validate
+
+  # Half two: does the site actually render? The uploaded artifact lets a
+  # reviewer download the rendered HTML instead of taking the PR on faith.
+  build-site:
+    name: Build site
+    permissions:
+      contents: read
+    # Swapping to the line below requires this repo to be added to the org's
+    # Blacksmith app first (see ../practicum-playbooks/blacksmith-setup.md).
+    # runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build static site
+        run: python -m generator build
+
+      - name: Upload rendered site
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-${{ github.sha }}
+          path: dist/
+          retention-days: 7

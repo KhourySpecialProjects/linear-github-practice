@@ -1,0 +1,20 @@
+{% extends "base.html.j2" %}
+{% block title %}Page not found &middot; {{ site.title }}{% endblock %}
+{% block description %}That page is not part of {{ site.title }}.{% endblock %}
+
+{% block content %}
+<section class="notfound">
+  <div class="wrap notfound__inner">
+    <p class="notfound__code" aria-hidden="true">404</p>
+    <h1 class="notfound__title">That page isn&rsquo;t here</h1>
+    <p class="notfound__body">
+      The bio you were looking for may not be merged yet &mdash; this site is rebuilt
+      every time a pull request lands on <code>testing</code>.
+    </p>
+    <p class="notfound__actions">
+      <a class="button" href="/">Back to all bios</a>
+    </p>
+    <p class="notfound__meta">{{ stats.bios }} {{ 'bio' if stats.bios == 1 else 'bios' }} published across {{ stats.total_teams }} teams.</p>
+  </div>
+</section>
+{% endblock %}

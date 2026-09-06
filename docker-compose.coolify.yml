@@ -1,0 +1,26 @@
+# Deployed Testing environment, tracking the `testing` branch.
+#
+# How this reaches the internet:
+#   - Coolify runs this compose file on the server. The container publishes
+#     nothing to the host -- `expose` only opens port 80 on the internal
+#     Docker network, so several deployments can coexist without fighting
+#     over host ports.
+#   - Coolify's Traefik proxy sits in front and routes the configured domain
+#     to that exposed port, terminating TLS on the way.
+#   - The domain, and anything else environment-specific, is configured in the
+#     Coolify UI, not here. This file stays identical across environments.
+#   - A merge into `testing` triggers the rebuild automatically: the org-wide
+#     Coolify GitHub app sends the push webhook, Coolify rebuilds the image
+#     (which re-runs `python -m generator build`) and swaps the container.
+services:
+  site:
+    build: .
+    expose:
+      - "80"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/"]
+      interval: 30s
+      timeout: 3s
+      start_period: 5s
+      retries: 3

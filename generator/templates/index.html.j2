@@ -1,0 +1,151 @@
+{% extends "base.html.j2" %}
+{% block title %}{{ site.title }}{% endblock %}
+{% block description %}{{ site.tagline or site.title }} Profiles for {{ stats.bios }} students across {{ stats.total_teams }} teams.{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="wrap hero__inner">
+    {% if site.course %}
+    <p class="hero__eyebrow">{{ site.course }}</p>
+    {% endif %}
+    <h1 class="hero__title">{{ site.title }}</h1>
+    {% if site.tagline %}
+    <p class="hero__tagline">{{ site.tagline }}</p>
+    {% endif %}
+
+    <dl class="stats">
+      <div class="stat">
+        <dt class="stat__label">Bios published</dt>
+        <dd class="stat__value">{{ stats.bios }}</dd>
+      </div>
+      <div class="stat">
+        <dt class="stat__label">Teams represented</dt>
+        <dd class="stat__value">{{ stats.teams }}</dd>
+      </div>
+      <div class="stat">
+        <dt class="stat__label">Teams on the roster</dt>
+        <dd class="stat__value">{{ stats.total_teams }}</dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+{% if stats.bios == 0 %}
+<section class="wrap zero">
+  <h2 class="zero__title">No bios have landed yet</h2>
+  <p class="zero__body">
+    This page fills in as pull requests merge. Copy <code>bios/TEMPLATE.md</code> to
+    <code>bios/firstname-lastname.md</code>, fill in the frontmatter, and open a pull request
+    into <code>testing</code>.
+  </p>
+  <p class="zero__hint">Teams waiting for their first bio: {{ site.team_names | join(', ') }}</p>
+</section>
+{% else %}
+<div class="wrap">
+  <div class="controls" data-controls>
+    <div class="search" role="search">
+      <label class="search__label" for="q">Search bios</label>
+      <input
+        class="search__input"
+        id="q"
+        type="search"
+        name="q"
+        placeholder="Name, headline, focus area&hellip;"
+        autocomplete="off"
+        spellcheck="false"
+        data-search-input>
+    </div>
+
+    <div class="chips" role="group" aria-label="Filter by team">
+      {% for group in groups %}
+      <button
+        class="chip"
+        type="button"
+        data-team-filter="{{ group.team.slug }}"
+        aria-pressed="false"
+        style="--accent: {{ group.team.accent }}">
+        <span class="chip__dot" aria-hidden="true"></span>
+        {{ group.team.name }}
+        <span class="chip__count">{{ group.count }}</span>
+      </button>
+      {% endfor %}
+      <button class="chip chip--reset" type="button" data-reset hidden>Clear filters</button>
+    </div>
+
+    <p class="results" role="status" aria-live="polite" data-results>
+      Showing {{ stats.bios }} of {{ stats.bios }} bios
+    </p>
+  </div>
+
+  <p class="no-results" data-no-results hidden>
+    Nothing matches that search. Try a shorter word, or clear the team filters.
+  </p>
+
+  {% for group in groups %}
+  <section
+    class="team"
+    data-team-section="{{ group.team.slug }}"
+    aria-labelledby="{{ group.team.slug }}"
+    style="--accent: {{ group.team.accent }}">
+    <header class="team__head">
+      <h2 class="team__name" id="{{ group.team.slug }}">{{ group.team.name }}</h2>
+      {% if group.team.tagline %}
+      <p class="team__tagline">{{ group.team.tagline }}</p>
+      {% endif %}
+      <p class="team__count">{{ group.count }} {{ 'bio' if group.count == 1 else 'bios' }}</p>
+    </header>
+
+    {% if group.count == 0 %}
+    <p class="team__empty">No bios have landed for {{ group.team.name }} yet &mdash; this slot fills in as pull requests merge.</p>
+    {% else %}
+    <ul class="wall">
+      {% for bio in group.bios %}
+      <li
+        class="wall__item"
+        data-card
+        data-team="{{ group.team.slug }}"
+        data-search="{{ bio.name }} {{ bio.headline }} {{ bio.team }} {{ bio.focus | join(' ') }} {{ bio.location or '' }} {{ bio.pronouns or '' }}">
+        <a class="card" href="{{ bio.url }}" style="--hue: {{ bio.hue }}">
+          <div class="card__top">
+            {% if bio.avatar %}
+            <img class="avatar avatar--img" src="{{ bio.avatar }}" alt="" loading="lazy" decoding="async" width="56" height="56" data-initials="{{ bio.initials }}">
+            {% else %}
+            <span class="avatar avatar--mono" aria-hidden="true">{{ bio.initials }}</span>
+            {% endif %}
+            <div class="card__ident">
+              <h3 class="card__name">{{ bio.name }}</h3>
+              {% if bio.pronouns %}
+              <p class="card__pronouns">{{ bio.pronouns }}</p>
+              {% endif %}
+            </div>
+          </div>
+
+          <p class="card__headline">{{ bio.headline }}</p>
+
+          {% if bio.focus %}
+          <p class="tags">
+            {% for item in bio.focus[:3] %}
+            <span class="tag">{{ item }}</span>
+            {% endfor %}
+            {% if bio.focus | length > 3 %}
+            <span class="tag tag--more">+{{ bio.focus | length - 3 }}</span>
+            {% endif %}
+          </p>
+          {% endif %}
+
+          <p class="card__foot">
+            {% if bio.location %}
+            <span class="card__location">{{ bio.location }}</span>
+            {% endif %}
+            <span class="card__more" aria-hidden="true">View bio &rarr;</span>
+          </p>
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </section>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
