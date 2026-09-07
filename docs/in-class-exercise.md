@@ -4,9 +4,10 @@ A 50-minute exercise for 12–20 students. Each student adds one bio file, opens
 pull request into `testing`, gets one peer approval, merges, and watches the
 deployed site rebuild.
 
-One-time repository, Linear and Coolify setup lives in
-[instructor-setup.md](./instructor-setup.md). This page is the class-day
-runbook.
+One-time repository, Linear and deployment setup lives in
+[instructor-setup.md](./instructor-setup.md), including the table of
+course-specific values (`<org>/<repo>`, `<KEY>`, `<deployed-url>`) this page
+refers to. This page is the class-day runbook.
 
 ## Learning objectives
 
@@ -23,22 +24,18 @@ By the end of the session every student has, once, for real:
 5. Squash-merged an approved, green PR and watched an automatic deploy follow
    the merge.
 
-The rules behind all of this are in
-[Developer Expectations](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/developer-expectations.md);
-the exercise exists to make students execute them once before the client work
-starts.
+None of this is exotic; it is the loop the client work runs on. The exercise
+exists to make students execute it once, on a change small enough that the
+workflow is the only thing they have to think about.
 
 ## Pre-class checklist
 
-- [ ] **Playbooks published.** Every playbook link in this repo points at
-      `KhourySpecialProjects/practicum-playbooks` on `main`. As of writing,
-      only `README.md`, `blacksmith-setup.md` and `onboarding.md` are on
-      `main` — the seven workflow playbooks students need most
-      (`start-an-issue`, `working-on-your-branch`, `open-a-pull-request`,
-      `reviewing-a-pull-request`, `respond-to-review-and-merge`,
-      `developer-expectations`, `environments-and-deployment`) are still
-      unpushed local files. Commit, merge to `main`, and confirm students have
-      read access, or those links 404 mid-exercise.
+- [ ] **Student walkthrough read once, by you.**
+      [student-quickstart.md](./student-quickstart.md) is the page students
+      follow end to end. Read it as though you were a student and confirm it
+      matches how your course actually works — the branch prefix, the review
+      ring, the local preview command. It is the only instruction they need,
+      so anything stale in it costs class time.
 - [ ] **Roster CSV** ready: `name,github,team` header, one row per student
       (`roster.example.csv` in the repo root shows the shape).
 - [ ] **Issue text and review ring generated**:
@@ -51,22 +48,21 @@ starts.
 
       The ring is the roster sorted by name: student *n* reviews student *n+1*,
       the last reviews the first.
-- [ ] **Linear issues created** in team **LGH**, one per student, titled
+- [ ] **Linear issues created** in team `<KEY>`, one per student, titled
       `Add bio for <Full Name>`, in **Todo**, with the generated description
       pasted in — it names the student's file, their team, and their assigned
-      reviewer's name and GitHub handle. The LGH team starts empty, so this is
+      reviewer's name and GitHub handle. A fresh team starts empty, so this is
       real work, not a check: budget a few minutes per class of 20.
 - [ ] **Students assigned** to their own issues, or told to self-assign at the
       start of class.
-- [ ] **GitHub repo** `KhourySpecialProjects/linear-github-practice` exists with
+- [ ] **GitHub repo** `<org>/<repo>` exists with
       `testing` as the default branch, protected: require a pull request,
       require 1 approving review, require the `validate-bios` and `build-site`
       checks, squash-merge only, auto-delete merged branches, admins can bypass.
 - [ ] **Every student has write access** to the repo (via the students' GitHub
       team) and has accepted the invitation *before* class.
-- [ ] **Coolify app** tracking `testing` with the Docker Compose build pack
-      pointing at `docker-compose.coolify.yml`, auto-deploy on, domain
-      reachable. Load it once yourself.
+- [ ] **Deployment tracking `testing`** with auto-deploy on and
+      `<deployed-url>` reachable. Load it once yourself.
 - [ ] **One worked example already merged** — a bio on the deployed site — so
       students see the finished shape and the site is never empty.
 - [ ] **Local Docker verified** by each student in advance:
@@ -81,8 +77,8 @@ starts.
 
 | Minutes | What happens |
 |---|---|
-| 0–5 | **Framing and demo.** One issue -> one branch -> one PR -> review -> merge -> deploy. Show the deployed site and the merged example bio. State the one difference from the playbooks: this repo has only `testing`. |
-| 5–10 | **Claim issue, cut branch.** Assign the issue, **Copy git branch name**, `git switch testing && git pull`, `git switch -c lgh-##-...`, `git push -u origin HEAD`. Everyone confirms their issue flipped to In Progress. |
+| 0–5 | **Framing and demo.** One issue -> one branch -> one PR -> review -> merge -> deploy. Show the deployed site and the merged example bio. Say once that this repo has exactly one long-lived branch, `testing`, so nobody hunts for a `main`. |
+| 5–10 | **Claim issue, cut branch.** Assign the issue, **Copy git branch name**, `git switch testing && git pull`, `git switch -c abc-##-...` (the prefix is your Linear team key and the issue number — paste what Linear gave you rather than typing it), `git push -u origin HEAD`. Everyone confirms their issue flipped to In Progress. |
 | 10–25 | **Write and preview the bio.** `cp bios/TEMPLATE.yml bios/firstname-lastname.yml`, set `name`/`team`/`headline`, replace the `about` block, uncomment any optional fields, then `docker compose up --build` (or `python -m generator validate` for the impatient). Nothing needs deleting to make the template parse. Circulate: most errors are the filename/`name` mismatch and YAML indentation. |
 | 25–32 | **Commit, push, open the PR.** One file, imperative message, base `testing`. Watch the checks start. Tell everyone to request the reviewer named on their issue, then stop touching their own PR. |
 | 32–42 | **Review ring.** Each student reviews exactly one PR: `name`, `team`, `headline` and `about` present and valid, filename matches the name and ends in `.yml`, `about` reads professionally, no other files touched. Approve when good enough. Call out the two-minute mark so nobody sits on a review. |
@@ -100,7 +96,7 @@ must not be rushed, because it is the part they have never done before.
 | Student blocked waiting on a reviewer (absent, slow, or stuck on their own bio) | Approve the PR yourself. Nobody waits more than two minutes on the ring. |
 | Ring broken by an absent student | Re-point the orphaned author at the next present student in the ring and say so out loud; do not re-generate the ring mid-class. |
 | CI red at minute 45 | Two options: read the annotation with them and fix it in 30 seconds, or admin-bypass the merge and have them fix it in a follow-up PR. Bypassing on purpose, out loud, is a better lesson than a stalled room — and it does not break the site, because `build` is not strict (see below). |
-| A bypassed bio is degraded on the deployed site | Expected, not broken. The bio renders with fallback values: under **Unassigned** if the `team` is wrong or missing, with `Bio still needs a headline` or a placeholder `about` if those could not be read. The Coolify deploy log carries the warning. The fix is the student's follow-up PR. |
+| A bypassed bio is degraded on the deployed site | Expected, not broken. The bio renders with fallback values: under **Unassigned** if the `team` is wrong or missing, with `Bio still needs a headline` or a placeholder `about` if those could not be read. The deploy log carries the warning. The fix is the student's follow-up PR. |
 | CI red for everyone at once | Something is wrong with the repo, not the students: check `site.yml` parses and the last merge to `testing` is green. Fall back to local `python -m generator validate` as the gate and merge with admin bypass. |
 | Student finishes early | Have them review a second PR (a real review, not a rubber stamp), or improve their `about` copy and push an update so they exercise re-request review. |
 | YAML indentation wave | A tab in the indentation gives `indented with a tab - YAML only allows spaces, so replace tabs with two spaces`; an unquoted value containing `': '` gives `invalid YAML at line N: mapping values are not allowed here - a value containing ': ' must be wrapped in quotes`. Demo both fixes once for the whole room: spaces only, and quote the value. |
@@ -108,18 +104,18 @@ must not be rushed, because it is the part they have never done before.
 | Merge conflict | Should be impossible — one new file per student. It means they edited someone else's bio, `site.yml`, or a repo file. Have them revert that file and re-push. |
 | Docker will not start | Send them down the no-Docker path: `python3 -m venv .venv`, `pip install -r requirements.txt`, `python -m generator serve` on http://localhost:8000. |
 | Linear issue did not move | The issue ID is missing from the branch name. Rename the branch from Linear's copied name and re-push. |
-| Deploy does not appear | Check the Coolify deployment log on the projector — a slow deploy is a teaching moment, not a failure. |
+| Deploy does not appear | Check the deployment log on the projector — a slow deploy is a teaching moment, not a failure. |
 
 ## When you bypass a straggler at minute 45
 
 Merging a red pull request with admin bypass does not take the site down. Know
 exactly why, so you can say it out loud instead of guessing.
 
-The merge to `testing` fires the Coolify webhook like any other merge, and the
+The merge to `testing` fires the deploy webhook like any other merge, and the
 image build runs `python -m generator build` — deliberately **not**
 `--strict`. The bad file is repaired with fallback values, every other card is
-unaffected, and the build exits 0 after printing a warning. Coolify's deploy
-log shows it:
+unaffected, and the build exits 0 after printing a warning. The deploy log
+shows it:
 
 ```
 warning: 1 problem(s) in bios/; 1 bio(s) rendered with fallback values:
@@ -152,12 +148,12 @@ Three points, out loud:
 2. **`testing` was protected, and that is why the loop exists.** Nobody pushed
    to a deployed branch. Every change on the live site arrived through a
    reviewed, merged pull request.
-3. **This repo showed you the first environment of four.** Real projects promote
-   Local -> Testing -> Staging -> Production, merging forward one step at a
-   time, each merge auto-deploying its own environment; see
-   [Environments & Deployment](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/environments-and-deployment.md).
-   Today you did Local -> Testing. On your client project the same PR you just
-   merged gets promoted twice more, which is why "merge to a protected branch"
+3. **You did one hop of a longer path.** This repo has exactly one deployed
+   branch on purpose, so the exercise fits in 50 minutes. A real project
+   usually has several deployed environments in a line, and a change is merged
+   forward one step at a time, each merge deploying its own environment. The
+   pull request you just merged would be promoted again, more than once, with
+   somebody's approval each time — which is why "merge to a protected branch"
    is a decision and not a keystroke.
 
 Ask two questions before they leave: who had a red check and what did it say,
@@ -165,7 +161,7 @@ and what did you look at when you reviewed someone else's PR.
 
 ## After class
 
-- [ ] Confirm every issue in LGH is **Done**; chase the ones that are not.
+- [ ] Confirm every issue in team `<KEY>` is **Done**; chase the ones that are not.
 - [ ] Merge or close any leftover PRs; delete stale branches.
 - [ ] Confirm the deployed site lists everyone.
 - [ ] Confirm nothing is left under **Unassigned** and the last deploy log has

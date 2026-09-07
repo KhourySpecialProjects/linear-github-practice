@@ -2,17 +2,8 @@
 
 Follow this page start to finish during class. It is the whole exercise: one
 Linear issue, one branch, one file, one pull request, one review, one merge.
-
-The workflow rules themselves live in the playbooks — this page only tells you
-what to do in *this* repository, and links to the playbook for each step. Every
-playbook link goes to
-[KhourySpecialProjects/practicum-playbooks](https://github.com/KhourySpecialProjects/practicum-playbooks).
-That repo is private, so if a link 404s for you, you have not been granted
-access yet — say so and it will be fixed.
-
-[Developer Expectations](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/developer-expectations.md) is
-the source of truth for branches, commits, PRs and review. If this page and that
-page ever disagree, that page wins.
+Everything you need is in this repository; the field rules for the file you
+write are in [`bios/README.md`](../bios/README.md).
 
 ## Goal
 
@@ -22,13 +13,14 @@ Add `bios/firstname-lastname.yml` for yourself, get it reviewed and merged into
 The file is a YAML file — structured `key: value` data. Only one field,
 `about`, is prose, and that prose is Markdown.
 
-## One thing that differs from the playbooks
+## This repo has one branch on purpose
 
-The playbooks describe four environments — Local, Testing, Staging, Production —
-because that is what a real client project uses. This teaching repo has only
-**`testing`**: it is the default branch, it is protected, and Coolify deploys it.
-There is no `staging`, no `production`, and no `main` here. You branch from
-`testing` and you pull-request back into `testing`.
+There is exactly one long-lived branch here: **`testing`**. It is the default
+branch, it is protected, and it is the branch that gets deployed. There is no
+`staging`, no `production` and no `main`. You branch from `testing` and you
+pull-request back into `testing`. Real client projects usually promote a change
+through several environments; this exercise stops at the first deployed one on
+purpose, so the class practises the review loop and not release plumbing.
 
 ## Checklist
 
@@ -43,24 +35,29 @@ There is no `staging`, no `production`, and no `main` here. You branch from
 
 ### 1. Claim your issue
 
-Open the LGH project in Linear, find **Add bio for &lt;Your Name&gt;**, assign it to
-yourself, and read the description — it names **the person you must request as
-your reviewer**. Playbook: [Start an Issue](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/start-an-issue.md).
+Open the Linear project your instructor pointed you at, find **Add bio for
+&lt;Your Name&gt;**, assign it to yourself, and read the description — it names
+**the person you must request as your reviewer**.
 
 ### 2. Copy the branch name from Linear
 
 On the issue, click **Copy git branch name**. You get something like
-`lgh-12-add-bio-for-jane-doe`. Do not invent your own name: the `lgh-12` part is
-what moves the issue through Todo -> In Progress -> In Review -> Done.
+`abc-12-add-bio-for-jane-doe`. The `abc-12` part is your Linear team's key plus
+the issue number, so yours starts with your own team's key. Do not invent your
+own name: that ID is what moves the issue through Todo -> In Progress -> In
+Review -> Done.
 
 ### 3. Start the branch from an up-to-date `testing`
 
 ```sh
 git switch testing
 git pull
-git switch -c lgh-12-add-bio-for-jane-doe   # paste YOUR name from Linear
+git switch -c abc-12-add-bio-for-jane-doe   # paste YOUR name from Linear
 git push -u origin HEAD
 ```
+
+Never push directly to `testing`: it is protected, and work reaches it only
+through a reviewed pull request. Push to your own branch.
 
 Check Linear: the issue should now be **In Progress** with the branch linked.
 
@@ -81,10 +78,9 @@ Open your file and edit it. Nothing needs deleting to make it parse — the
 template is valid YAML as it ships, and the `#` lines are YAML comments.
 
 - Set `name` and `headline` (90 characters maximum), and set `team` to the one
-  named on your Linear issue. It must match a team in
-  [`../site.yml`](../site.yml) — as shipped: Team Falcon, Team Kestrel, Team
-  Osprey, Team Harrier, Team Merlin, Team Goshawk, Team Kite, Team Caracara,
-  Team Peregrine, Team Condor, Team Eagle. Case does not matter; spelling does.
+  named on your Linear issue. It must match a team listed in
+  [`../site.yml`](../site.yml) — open that file to see the exact names your
+  instructor is using. Case does not matter; spelling does.
 - Replace the `about` text with 40–2000 characters about you. Keep the
   `about: |` line and keep your text indented two spaces under it; it is
   rendered as Markdown, so `**bold**`, links and `-` lists work.
@@ -152,15 +148,16 @@ git commit -m "Add bio for Jane Doe"
 git push
 ```
 
-Imperative mood, one file. Playbook:
-[Working on Your Branch](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/working-on-your-branch.md).
+Write the subject in the imperative mood — "Add bio for Jane Doe", not "added
+my bio". Keep commits small and keep this one to your single file. Never commit
+secrets, credentials or a `.env` file; this repo needs none of them.
 
 ### 8. Open the pull request
 
 On GitHub, open a PR with **base = `testing`**, compare = your branch. The PR
 template fills in the checklist; tick it honestly. The Linear issue links itself
-because the branch carries `lgh-12`. Playbook:
-[Open a Pull Request](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/open-a-pull-request.md).
+because the branch carries the issue ID, and opening the PR moves the issue to
+**In Review**.
 
 Then, in the **Reviewers** panel, request **the reviewer named on your Linear
 issue**. Not a friend, not whoever is nearest — the assigned one.
@@ -177,21 +174,22 @@ student *n+1*, and the last student reviews the first. Open their PR, read
 - `about` reads professionally and is a sentence or two, not a placeholder
 - no files outside `bios/` were touched
 
-Approve when it is good enough to ship. Playbook:
-[Reviewing a Pull Request](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/reviewing-a-pull-request.md).
+Be specific and be kind: comment on the code, never on the person, and say what
+you would change rather than only that something is wrong. Approve when the
+change is good enough to ship, not when it is perfect, and save **Request
+changes** for a real blocker — anything smaller is a comment.
 
 ### 10. Address feedback, then squash and merge
 
 Fix or reply to every comment, push, resolve the threads, re-request review.
 When you have one approval and green CI, use **Squash and merge**, then
-**Delete branch**. Playbook:
-[Respond to Review and Merge](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/respond-to-review-and-merge.md).
+**Delete branch**. Squash merge keeps one commit per issue on `testing`.
 
 ### 11. Confirm Linear and watch the deploy
 
-The merge moves your issue to **Done** automatically. Coolify sees the push to
-`testing` and rebuilds; within a minute or two your card is on the deployed site
-(the instructor will give you the URL). Then:
+The merge moves your issue to **Done** automatically. The deployment watches the
+`testing` branch and rebuilds on the push, so within a minute or two your card
+is on the deployed site (your instructor will give you its URL). Then:
 
 ```sh
 git switch testing
@@ -240,15 +238,16 @@ one of those substitutions, so CI is still red and the fix is still yours. Run
 
 **Merge conflict.** You should not get one. Your PR adds one brand-new file that
 nobody else touches, and `site.yml` is instructor-owned, so there is no shared
-file to collide on. If you somehow do have a conflict, you probably edited
-someone else's bio or a repo file — undo that; see
-[Working on Your Branch](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/working-on-your-branch.md).
+file to collide on. If you do have a conflict, you probably worked on `testing`
+itself or edited someone else's bio — undo the changes that are not your own
+file, and if you have not committed yet, `git switch -c <your-branch>` carries
+your work onto a branch of your own (next entry).
 
 **You started on the wrong branch** (you edited files while on `testing`, and
 have not committed). Take the work with you:
 
 ```sh
-git switch -c lgh-12-add-bio-for-jane-doe
+git switch -c abc-12-add-bio-for-jane-doe
 ```
 
 If you already committed to the wrong branch, ask the instructor before

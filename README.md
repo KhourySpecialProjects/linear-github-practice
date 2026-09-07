@@ -1,18 +1,22 @@
 # Linear + GitHub Practice: Bio Aggregator
 
-A professional bio aggregator for the practicum. Every student adds one YAML
-file to `bios/`, and the site is regenerated from whatever files exist at build
-time — one card on the home page and one detail page per person.
+A reusable in-class exercise for teaching a Linear + GitHub workflow. Every
+student adds one YAML file to `bios/`, and the site is regenerated from whatever
+files exist at build time — one card on the home page and one detail page per
+person.
 
 The point is not the site. The point is the workflow: one Linear issue, one
 branch, one pull request, one peer review, one squash merge, one automatic
 deploy.
 
+The shipped content — site title and tagline, team names, the example bios — is
+placeholder content that an adopting instructor replaces; no code depends on it.
+
 ## 60-second quickstart
 
+Clone the repository, then from its root:
+
 ```sh
-git clone git@github.com:KhourySpecialProjects/linear-github-practice.git
-cd linear-github-practice
 docker compose up --build
 ```
 
@@ -60,7 +64,7 @@ A broken bio does not disappear. `build` substitutes fallback values, prints a
 taking the whole site down; the Dockerfile deliberately builds without
 `--strict` for that reason. `python -m generator validate`, which CI runs on
 every pull request, still fails on every one of those substitutions. Details:
-[Instructor setup](docs/instructor-setup.md#7-strict-where-it-teaches-resilient-where-it-deploys).
+[Instructor setup](docs/instructor-setup.md).
 
 A bio file is structured data: `name`, `team`, `headline` and the optional
 fields are plain YAML values. The one prose field is `about`, a YAML block
@@ -75,7 +79,7 @@ bios/                        one YAML file per person; add yours, edit nobody el
 docs/
   student-quickstart.md      the page a student follows during class
   in-class-exercise.md       instructor runbook for the 50-minute session
-  instructor-setup.md        one-time GitHub, Linear and Coolify setup
+  instructor-setup.md        one-time GitHub, Linear and deployment setup
 generator/                   the static site generator (instructor-owned; students never edit)
   __main__.py                the validate / build / serve commands
   bios.py                    parsing and validation rules for one bio file
@@ -99,30 +103,30 @@ requirements-dev.txt         test dependencies
 ## Branches and deploys
 
 - `testing` is the only long-lived branch: default, protected, and the branch
-  Coolify auto-deploys. There is no `staging`, `production` or `main` here.
+  that is auto-deployed. There is no `staging`, `production` or `main` here.
 - Work happens on a branch named by Linear's **Copy git branch name**
-  (`lgh-12-add-bio-for-jane-doe`), which is pull-requested into `testing` and
-  squash-merged after one approval and green CI.
-- Merging to `testing` triggers the Coolify webhook, which rebuilds and
+  (`abc-12-add-bio-for-jane-doe`, where `abc-12` is the team key and issue
+  number), which is pull-requested into `testing` and squash-merged after one
+  approval and green CI.
+- Merging to `testing` triggers the deploy webhook, which rebuilds and
   redeploys the site.
 
-The playbooks describe the full Local -> Testing -> Staging -> Production
-promotion path used on real client projects. This teaching repo deliberately
-stops at the first deployed environment.
+One branch is a deliberate choice. Real client projects usually promote a change
+through several environments; this exercise stops at the first deployed one so a
+50-minute class practises the review loop rather than release plumbing.
+
+## Use this in your course
+
+Fork the repo and replace four things: the identity and team list in `site.yml`;
+your roster (`name,github,team`, see `roster.example.csv`) fed to
+`python scripts/roster.py roster.csv --ring`; the example bios in `bios/` (keep
+`TEMPLATE.yml`); and the deployed URL you hand out in class.
+[Instructor setup](docs/instructor-setup.md) covers the rest — GitHub, Linear
+and deployment configuration.
 
 ## Documentation
 
 - [Student quickstart](docs/student-quickstart.md) — do the exercise, start to finish
 - [In-class exercise runbook](docs/in-class-exercise.md) — instructor timeline and failure modes
-- [Instructor setup](docs/instructor-setup.md) — repo, Linear and Coolify configuration
+- [Instructor setup](docs/instructor-setup.md) — repo, Linear and deployment configuration
 - [`bios/README.md`](bios/README.md) — the bio file contract in two minutes
-
-Workflow playbooks (sibling repo, also published to students separately):
-
-- [Developer Expectations](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/developer-expectations.md) — the source of truth
-- [Start an Issue](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/start-an-issue.md)
-- [Working on Your Branch](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/working-on-your-branch.md)
-- [Open a Pull Request](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/open-a-pull-request.md)
-- [Reviewing a Pull Request](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/reviewing-a-pull-request.md)
-- [Respond to Review and Merge](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/respond-to-review-and-merge.md)
-- [Environments & Deployment](https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/environments-and-deployment.md)

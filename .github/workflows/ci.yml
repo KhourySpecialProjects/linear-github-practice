@@ -23,9 +23,9 @@ jobs:
     name: Validate bios
     permissions:
       contents: read
-    # Swapping to the line below requires this repo to be added to the org's
-    # Blacksmith app first (see https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/blacksmith-setup.md).
-    # runs-on: blacksmith-4vcpu-ubuntu-2404
+    # If the org has self-hosted or third-party runners, swap `runs-on` for
+    # one of their labels, e.g.:
+    # runs-on: my-org-4vcpu-ubuntu-2404
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -47,9 +47,9 @@ jobs:
     name: Build site
     permissions:
       contents: read
-    # Swapping to the line below requires this repo to be added to the org's
-    # Blacksmith app first (see https://github.com/KhourySpecialProjects/practicum-playbooks/blob/main/blacksmith-setup.md).
-    # runs-on: blacksmith-4vcpu-ubuntu-2404
+    # If the org has self-hosted or third-party runners, swap `runs-on` for
+    # one of their labels, e.g.:
+    # runs-on: my-org-4vcpu-ubuntu-2404
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

@@ -74,15 +74,15 @@ Any key that is not in that table is a validation error. Copy
 ### Teams
 
 `team` must match one of the teams in [`../site.yml`](../site.yml), which the
-instructor owns. As shipped those are:
+instructor owns. **That file is the authoritative list — read it, do not trust
+a list copied into prose.** Your Linear issue names the team you belong to.
 
-Team Falcon, Team Kestrel, Team Osprey, Team Harrier, Team Merlin, Team
-Goshawk, Team Kite, Team Caracara, Team Peregrine, Team Condor, Team Eagle.
+The teams shipped in this repository (Team Falcon, Team Kestrel, Team Osprey
+and so on) are example content: an instructor reusing this exercise is expected
+to replace them with the real team names for their own course, so what is in
+`site.yml` may look nothing like these.
 
-Matching ignores case and surrounding whitespace. Your Linear issue names the
-team you belong to. If your instructor renamed, added or removed a team,
-`site.yml` is the list that counts — read it there rather than trusting this
-paragraph.
+Matching ignores case and surrounding whitespace.
 
 ### About `about`
 
