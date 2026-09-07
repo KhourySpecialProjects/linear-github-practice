@@ -13,20 +13,26 @@ exercise to another school, org or Linear workspace.
 
 | Placeholder | What it is | This instance |
 |---|---|---|
-| `<org>/<repo>` | GitHub owner and repository for this exercise, as used by `gh` commands and clone URLs | `KhourySpecialProjects/linear-github-practice` |
+| `<template-org>/<template-repo>` | The template repository you generate your class repo from — this repo | `KhourySpecialProjects/linear-github-practice` |
+| `<org>/<repo>` | The repository you create for your class, from that template | Create one per class, e.g. `<your-org>/bio-aggregator-<term>` |
 | `<KEY>` | Linear team key, uppercase — the `ENG` in `ENG-142`. It becomes the prefix of every branch name students copy out of Linear. | `LGH` |
 | `<deployed-url>` | URL the deployed site is served from | Not yet assigned — paste it here once your host gives you a domain, and give it to students |
 | Linear workspace | The workspace holding the team above | `khoury-practicum` |
 | `site.yml`: `title`, `tagline`, `course`, `footer` | The site's own name, one-line description, course label and footer line. School and term names belong here, not in the docs. | Set for the shipped course; edit in `site.yml` (see [section 6](#6-tune-siteyml-before-class)) |
 | `site.yml`: `teams` | The team names, taglines and accent colours a bio's `team` is checked against | Eleven shipped teams; edit in `site.yml` |
 
+If you are reading this inside the template repository itself and want to teach
+directly from it rather than generating a copy, skip section 1 — but expect to
+undo each term's student bios by hand, and keep in mind that anything you merge
+becomes the starting point for every future class.
+
 Everything else below is concrete.
 
 ## Goal
 
-`<org>/<repo>` exists with `testing` as its only branch — default, protected,
-and auto-deploying to `<deployed-url>` — plus one Linear issue per student in
-team `<KEY>`.
+`<org>/<repo>`, generated from the template, exists with `testing` as its only
+branch — default, protected, and auto-deploying to `<deployed-url>` — plus one
+Linear issue per student in team `<KEY>`.
 
 ## This repo has one environment on purpose
 
@@ -37,21 +43,38 @@ the protected branch, and the branch the host deploys. There is no `staging`, no
 `production`, no `main`. Say this once in class so students do not go looking
 for the other branches.
 
-## 1. Create the repository
+## 1. Create your class repository from the template
 
-The local repo starts with no commits and no remote. Make `testing` the only
-branch from the very first commit, so it becomes the default automatically:
+This repository is a GitHub **template repository**. You do not start from an
+empty directory, and you do not fork it — you generate a fresh repository from
+it, once per class.
+
+From the web UI: open `<template-org>/<template-repo>`, click **Use this
+template** -> **Create a new repository**, and name it for your class. Or, in
+one command:
 
 ```sh
-cd linear-github-practice
-git switch -c testing
-git add -A
-git commit -m "Add bio aggregator scaffold"
-gh repo create <org>/<repo> --private --source . --remote origin
-git push -u origin testing
+gh repo create <org>/<repo> --template <template-org>/<template-repo> --private
+git clone git@github.com:<org>/<repo>.git
+cd <repo>
 ```
 
-Then confirm:
+**Use the template, not a fork.** A fork keeps an upstream link, and GitHub's
+"Compare & pull request" banner on a fork defaults the **base** to the upstream
+repository. With twenty first-time contributors, some of them will open their
+bio PR against the template instead of your class repo. A template-generated
+repository has no upstream, so that mistake is impossible. Forks also do not
+carry branch protection or merge settings, so they buy you nothing here.
+
+Two consequences of generating from a template, both wanted:
+
+- **Only the default branch is copied.** The template's default branch is
+  `testing`, so your new repository starts with `testing` as its only branch and
+  as its default. There is no `main` to clean up.
+- **History is not shared.** Your repository starts from a single initial
+  commit, so students never see the template's development history.
+
+Confirm the default branch:
 
 ```sh
 gh repo view <org>/<repo> --json defaultBranchRef
@@ -59,6 +82,33 @@ gh repo view <org>/<repo> --json defaultBranchRef
 
 It must report `testing`. If not:
 `gh repo edit <org>/<repo> --default-branch testing`.
+
+Repository **settings are not copied** by the template — branch protection,
+merge options and app installations are per-repository. Sections 2 to 4 set
+them up.
+
+### If you cannot use the template
+
+If you are outside the template's organization, or you were handed an archive,
+start from a clone and detach it:
+
+```sh
+git clone git@github.com:<template-org>/<template-repo>.git <repo>
+cd <repo>
+git remote remove origin
+gh repo create <org>/<repo> --private --source . --remote origin
+git push -u origin testing
+```
+
+Check `git branch -a` afterwards: `testing` must be the only branch.
+
+### Then make it yours
+
+The shipped site identity, teams and example bios are placeholder content.
+Replace them before class — see [section 6](#6-tune-siteyml-before-class) for
+`site.yml`, and delete or replace the example bios in `bios/` (keeping one is
+useful, so the site is never empty when students first load it; see
+[section 8](#8-seed-one-worked-example)).
 
 The repository must be visible to:
 
@@ -276,7 +326,7 @@ one wins where they disagree. This repo does not assume any exist.
 
 ## Verification
 
-- [ ] `gh repo view <org>/<repo> --json defaultBranchRef` reports `testing`
+- [ ] `<org>/<repo>` was generated from the template (its **Pull requests** tab offers no upstream base) and `gh repo view <org>/<repo> --json defaultBranchRef` reports `testing`
 - [ ] A test PR into `testing` cannot merge without 1 approval and both checks
 - [ ] `validate-bios` fails on a deliberately broken bio and annotates the file
 - [ ] `python -m generator build` on that same broken bio exits 0 with a `warning:` line, and `python -m generator build --strict` exits 1
@@ -291,6 +341,25 @@ one wins where they disagree. This repo does not assume any exist.
   silently breaks the protection rule and the deploy webhook.
 - The bio loader skips `bios/TEMPLATE.yml`, and it only reads YAML files, so
   `bios/README.md` is never picked up either — you can document freely in both.
-- Rerunning the exercise next term: delete the student bios from `bios/` in one
-  instructor PR, keep everything else, re-run `scripts/roster.py` with the new
-  roster.
+- Rerunning the exercise next term: generate a fresh repository from the
+  template again. That is cheaper and safer than unpicking a term's student
+  bios, and it leaves last term's site standing at its own URL. If you would
+  rather reuse one repository, delete the student bios from `bios/` in a single
+  instructor pull request, keep everything else, and re-run
+  `scripts/roster.py` with the new roster.
+
+## Maintaining the template
+
+Only relevant if you own the template repository itself.
+
+- Keep **Settings -> Template repository** checked, so **Use this template**
+  appears. From the CLI: `gh repo edit <template-org>/<template-repo> --template`.
+- Keep `testing` as the only branch and the default branch. Template generation
+  copies just the default branch, so anything on another branch will not reach
+  an adopting instructor.
+- Never merge a class's student bios into the template. Every generated
+  repository starts from whatever is in `bios/`, and one term's roster is noise
+  for the next.
+- A generated repository shares no history with the template, so `git pull` will
+  not bring improvements across. Carry a fix over with `git cherry-pick`, or
+  apply it in both places.

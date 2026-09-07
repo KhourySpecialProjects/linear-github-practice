@@ -55,8 +55,10 @@ workflow is the only thing they have to think about.
       real work, not a check: budget a few minutes per class of 20.
 - [ ] **Students assigned** to their own issues, or told to self-assign at the
       start of class.
-- [ ] **GitHub repo** `<org>/<repo>` exists with
-      `testing` as the default branch, protected: require a pull request,
+- [ ] **GitHub repo** `<org>/<repo>` generated from the template repository
+      (**Use this template**, not a fork — see
+      [instructor-setup.md](./instructor-setup.md#1-create-your-class-repository-from-the-template)),
+      with `testing` as the default branch, protected: require a pull request,
       require 1 approving review, require the `validate-bios` and `build-site`
       checks, squash-merge only, auto-delete merged branches, admins can bypass.
 - [ ] **Every student has write access** to the repo (via the students' GitHub

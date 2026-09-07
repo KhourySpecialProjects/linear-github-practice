@@ -11,6 +11,8 @@ deploy.
 
 The shipped content — site title and tagline, team names, the example bios — is
 placeholder content that an adopting instructor replaces; no code depends on it.
+Generate your own copy with **Use this template**; see
+[Use this in your course](#use-this-in-your-course).
 
 ## 60-second quickstart
 
@@ -117,12 +119,23 @@ through several environments; this exercise stops at the first deployed one so a
 
 ## Use this in your course
 
-Fork the repo and replace four things: the identity and team list in `site.yml`;
-your roster (`name,github,team`, see `roster.example.csv`) fed to
+This repository is a GitHub **template repository**. Click **Use this template**
+-> **Create a new repository** (or
+`gh repo create <your-org>/<your-repo> --template <this-org>/<this-repo> --private`)
+to generate a fresh repository for your class. Do not fork it: on a fork,
+GitHub's "Compare & pull request" banner defaults the base to the upstream
+repository, and sooner or later a student opens their bio PR against the
+template instead of your class repo.
+
+Only the default branch is copied, so your new repository starts with `testing`
+as its only branch, and it shares no history with the template.
+
+Then replace four things: the identity and team list in `site.yml`; your roster
+(`name,github,team`, see `roster.example.csv`) fed to
 `python scripts/roster.py roster.csv --ring`; the example bios in `bios/` (keep
 `TEMPLATE.yml`); and the deployed URL you hand out in class.
 [Instructor setup](docs/instructor-setup.md) covers the rest — GitHub, Linear
-and deployment configuration.
+and deployment configuration, and the settings the template does not carry over.
 
 ## Documentation
 
