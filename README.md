@@ -143,3 +143,4 @@ and deployment configuration, and the settings the template does not carry over.
 - [In-class exercise runbook](docs/in-class-exercise.md) — instructor timeline and failure modes
 - [Instructor setup](docs/instructor-setup.md) — repo, Linear and deployment configuration
 - [`bios/README.md`](bios/README.md) — the bio file contract in two minutes
+- [Devlog](docs/devlog.md) — what shipped, the decisions behind it, and what is outstanding
