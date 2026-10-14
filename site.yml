@@ -10,36 +10,15 @@ tagline: One YAML file per teammate, shipped through the same review workflow we
 course: Khoury Practicum · Fall 2026
 footer: Northeastern University · Khoury College of Computer Sciences · built from the testing branch
 teams:
-  - name: Team Falcon
-    tagline: Fast feedback, small pull requests
+  - name: XCraft
     accent: "#7c5cff"
-  - name: Team Kestrel
-    tagline: Careful reviewers, calm releases
+  - name: Nimbus
     accent: "#00b6a4"
-  - name: Team Osprey
-    tagline: Data plumbing and sharp dashboards
+  - name: Leapfrog
     accent: "#ff7a45"
-  - name: Team Harrier
-    tagline: Platform work that nobody has to think about
+  - name: Mongooses
     accent: "#3b82f6"
-  - name: Team Merlin
-    tagline: Small tools, sharp edges filed off
+  - name: Before Dawn
     accent: "#ec4899"
-  - name: Team Goshawk
-    tagline: Reads the whole diff before commenting
+  - name: Katsura Systems
     accent: "#22c55e"
-  - name: Team Kite
-    tagline: Prototypes first, opinions second
-    accent: "#f59e0b"
-  - name: Team Caracara
-    tagline: Integrations and the glue nobody volunteers for
-    accent: "#8b5cf6"
-  - name: Team Peregrine
-    tagline: Performance work and honest benchmarks
-    accent: "#06b6d4"
-  - name: Team Condor
-    tagline: Long-range planning, short pull requests
-    accent: "#ef4444"
-  - name: Team Eagle
-    tagline: Ships the unglamorous last ten percent
-    accent: "#14b8a6"
