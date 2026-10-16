@@ -57,7 +57,7 @@ links:
 # OPTIONAL. An https URL to a square image, roughly 400px, on a host that
 # allows hotlinking. Leave it out and the site draws a monogram from your
 # initials instead - which is also what you get if the URL ever stops working.
-# avatar: https://avatars.githubusercontent.com/u/000000
+avatar: https://avatars.githubusercontent.com/u/101907253
 
 # OPTIONAL. One sentence.
 # fun_fact: I take photos!
