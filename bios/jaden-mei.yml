@@ -45,7 +45,8 @@ location: Boston, MA
 focus:
   - Software Engineer
   - Backend Engineer
-  - Sleeping Engineer
+  - Java
+  - Python
 
 # OPTIONAL. A mapping of label to URL. Every URL must start with https://
 # (http:// and mailto: are also accepted).
