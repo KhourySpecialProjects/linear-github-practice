@@ -15,7 +15,7 @@ name: Liya Liju
 
 # REQUIRED. Exactly one of: Team Falcon, Team Kestrel, Team Osprey, Team Harrier.
 # Matched ignoring case; anything else fails validation.
-team: Kastura Systems
+team: Katsura Systems
 
 # REQUIRED. One line, at most 90 characters.
 headline: 3rd-year Honors Computer Science and Business Administration student at Northeastern University
