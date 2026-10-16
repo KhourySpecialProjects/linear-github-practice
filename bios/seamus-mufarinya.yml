@@ -15,7 +15,7 @@ name: Seamus Mufarinya
 
 # REQUIRED. Exactly one of: Team Falcon, Team Kestrel, Team Osprey, Team Harrier.
 # Matched ignoring case; anything else fails validation.
-team: Team Leapfrog
+team: Leapfrog
 
 # REQUIRED. One line, at most 90 characters.
 headline: Fourth-year CS & Business student who likes running and playing soccer.
