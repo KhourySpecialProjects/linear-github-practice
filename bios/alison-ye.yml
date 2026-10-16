@@ -18,7 +18,7 @@ name: Alison Ye
 team: Before Dawn
 
 # REQUIRED. One line, at most 90 characters.
-headline: Fourth-year CS student with a concentration in AI
+headline: SWE @ DAILP | Honors Computer Science Student at Northeastern University
 
 # REQUIRED. Between 40 and 2000 characters. Rendered as Markdown, so **bold**,
 # *italic*, lists and [links](https://example.com) all work. Embedded HTML and
@@ -27,10 +27,10 @@ headline: Fourth-year CS student with a concentration in AI
 about: |
   I'm a fourth-year CS student at Northeastern with experience in 
   full-stack development, including building backend data models and frontend 
-  features through my co-op at DAILP using Rust, SQL, React, and TypeScript. 
-  This semester, I want to deepen my understanding of software architecture, 
-  improve my ability to write maintainable and scalable code, and become more 
-  confident navigating complex codebases. I appreciate clear communication, 
+  features through my position as a Research Assistant at DAILP using Rust, SQL, 
+  React, and TypeScript. This semester, I want to deepen my understanding of software 
+  architecture, improve my ability to write maintainable and scalable code, and become 
+  more confident navigating complex codebases. I appreciate clear communication, 
   constructive feedback, and collaborative problem-solving.
 
 # ---------------------------------------------------------------------------
