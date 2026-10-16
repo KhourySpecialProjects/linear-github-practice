@@ -15,7 +15,7 @@ name: Anish Sahoo
 
 # REQUIRED. Exactly one of: Team Falcon, Team Kestrel, Team Osprey, Team Harrier.
 # Matched ignoring case; anything else fails validation.
-team: TA
+team: Teaching Assistant
 
 # REQUIRED. One line, at most 90 characters.
 headline: 4th Year CS Student + TA + Tech Lead (cs4535 Fall 2025)
