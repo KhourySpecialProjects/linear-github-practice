@@ -43,6 +43,7 @@ location: Boston, MA
 focus:
   - C#
   - Rust
+  - Elm
   - Angular
   - TypeScript
   - Azure DevOps
