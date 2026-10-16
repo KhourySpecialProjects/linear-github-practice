@@ -18,7 +18,7 @@ name: Anish Sahoo
 team: Teaching Assistant
 
 # REQUIRED. One line, at most 90 characters.
-headline: 4th Year CS Student + TA + Tech Lead (cs4535 Fall 2025)
+headline: 4th Year CS Student + Tech Lead (cs4535 Fall 2025)
 
 # REQUIRED. Between 40 and 2000 characters. Rendered as Markdown, so **bold**,
 # *italic*, lists and [links](https://example.com) all work. Embedded HTML and
@@ -60,4 +60,4 @@ links:
 # avatar: https://avatars.githubusercontent.com/u/000000
 
 # OPTIONAL. One sentence.
-fun_fact: I take (photos)[https://asahoo.dev/photos]
+# fun_fact: I take photos!
