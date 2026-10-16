@@ -25,9 +25,15 @@ headline: Third-year CS student who likes big pull requests
 # javascript URLs are rejected. Keep every line indented two spaces under the
 # 'about: |' line; blank lines start a new paragraph.
 about: |
-  I love to explore and learns different topics. I am an avid sports fans and have 
-  watched and played so many sports. I want to improve my skills working in a team. 
-  A teammate would love my ability to get things done.
+  I'm a computer science student who got into tech because I like knowing how
+  things work, and I still go down rabbit holes on new topics just to see where
+  they lead. These days I'm most excited about writing code that real people
+  use and getting better at building software as part of a team.
+
+  Outside of class I'm a big sports fan. I've played and watched more sports
+  than I can count, and they taught me what I bring to a team. I show up,
+  communicate, and keep things moving. If there's a task nobody has picked up,
+  I'll usually be the one to take it and see it through.
 
 # ---------------------------------------------------------------------------
 # Everything below is OPTIONAL and commented out. Uncomment the fields you
