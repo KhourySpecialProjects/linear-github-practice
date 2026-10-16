@@ -52,9 +52,9 @@ focus:
 # OPTIONAL. A mapping of label to URL. Every URL must start with https://
 # (http:// and mailto: are also accepted).
 links:
-   Personal Website: abhirnaik.me
-   LinkedIn: www.linkedin.com/in/abhirnaik
-   Email: abhirnaik2005@gmail.com
+   Personal Website: https://abhirnaik.me
+   LinkedIn: https://www.linkedin.com/in/abhirnaik
+   Email: https://abhirnaik2005@gmail.com
 
 # OPTIONAL. An https URL to a square image, roughly 400px, on a host that
 # allows hotlinking. Leave it out and the site draws a monogram from your
