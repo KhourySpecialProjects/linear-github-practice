@@ -18,15 +18,17 @@ name: Kylan Chen
 team: Before Dawn 
 
 # REQUIRED. One line, at most 90 characters.
-headline: hihihi
+headline: Fourth-year Northeastern student studying CS
 
 # REQUIRED. Between 40 and 2000 characters. Rendered as Markdown, so **bold**,
 # *italic*, lists and [links](https://example.com) all work. Embedded HTML and
 # javascript URLs are rejected. Keep every line indented two spaces under the
 # 'about: |' line; blank lines start a new paragraph.
 about: |
-  I enjoy learning about distributed, operating, and network systems in modern 
-  C++ and Python.
+  I enjoy learning about distributed, operating, and network systems using 
+  modern C++ and Python. I've applied my knowledge at various SWE internships
+  at Verisk, Apple, and Amazon, as well as various personal projects.
+  
 
 # ---------------------------------------------------------------------------
 # Everything below is OPTIONAL and commented out. Uncomment the fields you
