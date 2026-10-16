@@ -25,9 +25,10 @@ headline: Fourth-year CS student with a passion for cybersecurity and software d
 # javascript URLs are rejected. Keep every line indented two spaces under the
 # 'about: |' line; blank lines start a new paragraph.
 about: |
-  I'm a fourth-year student at **Northeastern University**, graduating in 2027,
-  with a focus on **cybersecurity** and software development. This July, I'm
-  returning to **Palo Alto Networks** as a full-time engineer.
+  I'm a fourth-year **Computer Science** major with a **Music** minor at
+  **Northeastern University**, graduating in 2027, with a focus on
+  **cybersecurity** and software development. This July, I'm returning to
+  **Palo Alto Networks** as a full-time security engineer.
 
   I like understanding how systems work and how they break, and building
   software that holds up when someone pushes on it. You can find more about me
