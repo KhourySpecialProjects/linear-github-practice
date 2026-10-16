@@ -25,9 +25,14 @@ headline: Third-year CS and Business student
 # javascript URLs are rejected. Keep every line indented two spaces under the
 # 'about: |' line; blank lines start a new paragraph.
 about: |
-  I am part of SSA team. I want to learn more about how to build a project from start to finish while
-  working with a client. I ask a lot of questions and I like to get a lot of feedback on my work espeicially
-  when I am learning something new and teammates that have more experience than I. 
+
+  I’m part of the SSA team, and I’m excited 
+  to gain hands-on experience building a project from start to finish 
+  while working directly with a client. I’m curious and always eager to learn,
+  so I ask a lot of questions and actively seek feedback, especially from teammates
+  with more experience. I enjoy collaborating with others, learning new skills, and 
+  finding ways to improve my work. Through this project, I hope to grow as a developer
+  and gain a better understanding of the software development process in a real-world setting.
 
 # ---------------------------------------------------------------------------
 # Everything below is OPTIONAL and commented out. Uncomment the fields you
